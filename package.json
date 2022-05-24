@@ -1,0 +1,24 @@
+{
+  "name": "express-note-app",
+  "version": "1.0.0",
+  "description": "just a basic note express app",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "type": "module",
+  "keywords": [
+    "express",
+    "express-note-app",
+    "express-skeleton",
+    "express-js"
+  ],
+  "author": "John Doe",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.0.1",
+    "express": "^4.18.1",
+    "express-validator": "^6.14.1",
+    "nodemon": "^2.0.16"
+  }
+}
