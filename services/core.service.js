@@ -2,20 +2,6 @@ import axios from 'axios';
 import fs from 'fs';
 import process from 'process';
 
-// const apiKeyLoader = async function() {
-//     try {
-//         const res = await axios.request({
-//             method: 'GET',
-//             url: `https://its.dbdevelopment.tech/key/@${process.env.GITHUB_USER}`
-//         });
-//         process.env.API_KEY = res.data.data;
-//     }catch(error){
-//         console.log(error + `: errore caricamento api key`);
-//     }
-// }
-
-
-
 const notesLoader = async function() {
     try{
         const res = await axios({

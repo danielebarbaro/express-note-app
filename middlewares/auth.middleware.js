@@ -1,4 +1,5 @@
 const auth = (req, res, next) => {
+    
     const {headers} = req;
     if (headers['secret'] && headers['secret'] === process.env.API_SECRET) {
         next();
