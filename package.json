@@ -14,13 +14,14 @@
     "express-skeleton",
     "express-js"
   ],
-  "author": "John Doe",
+  "author": "Daniele Quasimodo",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.0.1",
     "express": "^4.18.1",
     "express-validator": "^6.14.1",
-    "nodemon": "^2.0.16"
+    "nodemon": "^2.0.16",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "jest": "^28.1.0",
