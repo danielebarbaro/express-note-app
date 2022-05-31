@@ -8,6 +8,7 @@ import {saveNote, notesLoader} from '../services/note.service.js';
 import {param, query, validationResult } from 'express-validator';
 
 
+
 //funziona
 const generateUUID = () => {
     
@@ -33,8 +34,8 @@ router.get('/init', logMiddleware,(req, res) => {
 })
 
 router.route('/api/notes')
-    .get(logMiddleware,async (req, res) => {
-
+    .get(logMiddleware, async (req, res) => {
+            
             res.status(200).json({
                 "success" : true,
                 "list" : true,
@@ -72,8 +73,8 @@ router.route('/api/notes')
         })
     })
 
-router.route('/api/notes/date')
-    .get(query('date').trim().isDate(), auth, logMiddleware, (req, res) => {
+    //funzionano ma non riesco a metterli sullo stesso path di /api/notes senza che venga scavalcata dalla lista di tutte le note
+router.get('/api/notes/date',query('date').trim().isDate(), auth, logMiddleware, (req, res) => {
         let date = req.query.date;
         console.log(date);
         let filtered = notesLoader().filter(n => new Date(n.date) > new Date(date))
@@ -91,6 +92,7 @@ router.route('/api/notes/date')
             "data" : [filtered]
         })
     })
+//funzionano ma non riesco a metterli sullo stesso path di /api/notes senza che venga scavalcata dalla lista di tutte le note
 router.get('/api/notes/limit',query('limit').isNumeric(), auth, logMiddleware, (req, res) =>{
         const errors = validationResult(req);
             if(!errors.isEmpty()){
