@@ -1,13 +1,46 @@
-# ExpressJs Note APP
-Creare un server che permetta di gestire un app di note statica con [express-js](https://expressjs.com/it/)
+stree# ExpressJs Note APP
+Creare un server che permetta di gestire un app di note con [express-js](https://expressjs.com/it/)
 
 ### Note:
- * L'applicativo non deve scrivere in nessun database, l'aggiunta o cancellazione deve esser dinamica.
- * si può usare sia dataset sia il file json
- * le response menzionate devono essere **IDENTICHE** a quelle menzionate sotto, attenzione agli status code
- * query params e params devono essere **VALIDATI**
+ * **L'applicativo non deve scrivere in nessun database**, l'aggiunta o cancellazione deve esser **dinamica**.
+ * Le response menzionate sotto sono a titolo esemplificativo, _i dati possono cambiare in base allo user_.
+ * La struttura delle response deve essere rispettata. Non devono essere inventante nuove chiavi e attenzione agli status code
+ * I query params e params devono essere **VALIDATI**
+ * Il progetto deve avere un file .env _(ATTENZIONEEE!!!)_
  * Il progetto deve avere un middleware di auth
- * Il progetto deve avere un middleware di log per tracciare tutte le rotte chiamate (`${method}: ${url} [${time}]`)
+ * Il progetto deve avere un middleware di log per tracciar e tutte le rotte chiamate (`${method}: ${url} [${time}]`)
+ * Il progetto deve prendere i dati delle note dall'api `https://its.dbdevelopment.tech/notes`
+
+### Init del progetto
+Ogni utente deve richiedere un `APIKEY` al link `https://its.dbdevelopment.tech/key/{user}`
+
+Per ottenere la chiave bisogna chiamare in `GET` la url `https://its.dbdevelopment.tech/key/@nomeutenteGitHub` con il vostro utente.
+
+_Salvatevi la chiave da usare nella seconda chiamata_.
+
+la response sara:
+```json
+    {
+        "status": "success",
+        "data": "chiave-personale-da-usare"
+    }
+```
+
+Per ottenere il file delle note bisogna chiamare in `POST` la url `https://its.dbdevelopment.tech/notes`
+con `payload`
+```json
+    {
+        "user": "@nomeutenteGitHub"
+    }
+```
+e con `header`: 
+```json
+    {
+       "token":  "chiave-personale-da-usare"
+    }
+```
+
+La chiamata deve salvare il data in `database/githubnotes.json`.
 
 ### Rotte da implementare:
 
@@ -20,23 +53,21 @@ Creare un server che permetta di gestire un app di note statica con [express-js]
       "list": true,
       "data": [
         {
-          "uuid": "e1960fc6-4d45-4b10-a333-7f90041e17c7",
+          "id": "e1960fc6-4d45-4b10-a333-7f90041e17c7",
           "user": "spacex",
           "date": "2022-05-20",
           "title": "Corso Node",
-          "body": "Crea app Note"
+          "body": "Crea app Note",
+          "created_at": "2022-05-31 09:04:34"
         },
         {
-          "uuid": "8be856f4-67d5-4c3f-95bd-e98e00799bb3",
+          "id": "8be856f4-67d5-4c3f-95bd-e98e00799bb3",
           "user": "puppy",
           "date": "2022-05-11",
           "title": "Corso Node",
-          "body": "Crea app Note"
-        },
-        
-        
-        ...
-        
+          "body": "Crea app Note",
+          "created_at": "2022-05-31 09:04:34"
+        }
       ]
     }
     ```
@@ -50,7 +81,7 @@ Creare un server che permetta di gestire un app di note statica con [express-js]
       "single": true,
       "data": [
         {
-          "uuid": "e1960fc6-4d45-4b10-a333-7f90041e17c7",
+          "id": "e1960fc6-4d45-4b10-a333-7f90041e17c7",
           "user": "spacex",
           "date": "2022-05-20",
           "title": "Corso Node",
@@ -69,7 +100,7 @@ Creare un server che permetta di gestire un app di note statica con [express-js]
       "filtered": true,
       "data": [
         {
-          "uuid": "e1960fc6-4d45-4b10-a333-7f90041e17c7",
+          "id": "e1960fc6-4d45-4b10-a333-7f90041e17c7",
           "user": "spacex",
           "date": "2023-11-20",
           "title": "Corso Node",
@@ -88,14 +119,14 @@ Creare un server che permetta di gestire un app di note statica con [express-js]
       "success": true,
       "data": [
         {
-          "uuid": "e1960fc6-4d45-4b10-a333-7f90041e17c7",
+          "id": "e1960fc6-4d45-4b10-a333-7f90041e17c7",
           "user": "spacex",
           "date": "2022-05-20",
           "title": "Corso Node",
           "body": "Crea app Note"
         },
         {
-          "uuid": "8be856f4-67d5-4c3f-95bd-e98e00799bb3",
+          "id": "8be856f4-67d5-4c3f-95bd-e98e00799bb3",
           "user": "puppy",
           "date": "2022-05-11",
           "title": "Corso Node",
@@ -108,8 +139,8 @@ Creare un server che permetta di gestire un app di note statica con [express-js]
 
 * [POST] - `api/notes` - Aggiunge una nota
    * La rotta **DEVE** essere Autenticata
-   * `uuid` **DEVE** essere autogenerato 
-   * `uuid` **NON DEVE** essere passato nel body 
+   * `id` aka `uuid` **DEVE** essere autogenerato 
+   * `id` aka `uuid` **NON DEVE** essere passato nel body 
    * Il body deve essere:
     ```json
     {
@@ -124,7 +155,7 @@ Creare un server che permetta di gestire un app di note statica con [express-js]
 
 * [PUT] - `api/notes/:uuid` - Aggiorna la nota
   * La rotta **DEVE** essere Autenticata
-  * **NON** posso aggiornare `data`, `uuid` e `user`
+  * **NON** posso aggiornare `data`, `id` aka `uuid` e `user`
   * Il body deve essere:
     ```json
     {
@@ -137,22 +168,30 @@ Creare un server che permetta di gestire un app di note statica con [express-js]
     
 
 * [GET] - `api/admin/user-stats/:user` - Restituisce tutte le note di un determinato `user`
-   * La rotta **DEVE** essere Autenticata [TBD]
+   * La rotta **DEVE** essere Autenticata
    * La risposta della rotta deve essere:
-   ```json
-   {
-   
-   }
-   ```
-* [GET] - `api/admin/note-count` - Restituisce il numero di note esistenti
-   * La rotta **DEVE** essere Autenticata [TBD]
-   * La risposta della rotta deve essere:
-   ```json
-   {
-   
-   }
-   ```
-
+  ```json
+  {
+    "success": true,
+    "data": [
+      {
+        "puppy": [
+          {
+            "date": "2022-05-20",
+            "title": "Corso Node",
+            "body": "Crea app Note"
+          },
+          {
+            "date": "2022-05-11",
+            "title": "Corso Node 1",
+            "body": "Crea Note"
+          }
+        ]
+      }
+    ]
+  }
+  ```
+  
 ### Specifiche Generiche da rispettare:
 1. Se visito uno rotta non corretta devo ricevere la seguente risposta.
     ```json
