@@ -6,7 +6,6 @@ import * as core from "../services/core.service.js";
 import logMiddleware from "../middlewares/log.middleware.js";
 import {saveNote, notesLoader} from '../services/note.service.js';
 import {param, query, validationResult } from 'express-validator';
-//funziona
 
 
 //funziona
@@ -32,16 +31,6 @@ router.get('/init', logMiddleware,(req, res) => {
         })
     }
 })
-
-// router.get(`/api/notes`, logMiddleware,(req, res) => {
-
-//     res.status(200).json({
-//         "success" : true,
-//         "list" : true,
-//         "data":notesLoader()
-//     });
-
-// });
 
 router.route('/api/notes')
     .get(logMiddleware,async (req, res) => {
