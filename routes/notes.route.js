@@ -1,5 +1,6 @@
+import * as ns from "./services/note.service.js"; 
 app.get('/api/notes', function (req, res) {
-    res.send('Hello World')
+    res.send(ns.loadNotes())
 })
   
 

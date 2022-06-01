@@ -3,9 +3,10 @@ import express, { request, response } from "express";
 import 'dotenv/config';
 import logMiddleware from "./middlewares/log.middleware.js";
 import authMiddleware from "./middlewares/auth.middleware.js";
-import{body, check, validationResult} from "express-validator";
+import {param, query, validationResult} from 'express-validator';
 import axios from "axios";
 import * as fs from 'fs';
+import * as ns from "./services/note.service.js"; 
 
 const port = process.env.PORT;
 const app = express()
@@ -40,22 +41,46 @@ app.get('/init', async function(req, res) {
     res.send('Hello World')
 })
 
-const loadNotes = function () {
-    try {
-        const data = fs.readFileSync('database/githubnotes.json')
-        const result = data.toString()
-        return JSON.parse(result)
-    } catch (e) {
-        console.log('ERRORE file non trovato', e.message)
-        return []
-    }
-}
-
-app.get('/prova', function (req, res) {
+app.get('/api/notes', function (req, res) {
     
-    loadNotes()
-    res.send('fatto')
+    res
+        .status(200)
+        .json({
+            success: 'true',
+            list: 'true',
+            data: 
+                (ns.loadNotes())
+        })
+    
 })
+
+
+app.get('/api/notes/:uuid', function (req, res) {
+    
+    const uuid = req.params.uuid;
+    const noteCaricate = (ns.loadNotes());
+    const notef = noteCaricate.filter((req => req === uuid))
+    if(notef === uuid)
+    {
+        res
+        .status(200)
+        .json({
+            success: 'true',
+            list: 'true',
+            data: notef
+                
+        })
+    }
+    else
+    {
+        res.send("Errore");
+    }
+    
+    
+})
+
+
+
 
 app.listen(port || 3000)
 
