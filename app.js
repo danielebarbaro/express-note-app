@@ -10,12 +10,65 @@ const data=fs.readFileSync('database/githubnotes.json');
 const result=data.toString();
 //console.log(result)
 
-app.get('/', authMiddleware, function (req, res) {
+app.get('/', authMiddleware,  function (req, res) {
 
     console.log(`Faccio modifica senza fare restart`)
     res.send('notes')
   })
+
+
+  app.get('/api/notes',  function (req, res) {
+
+    res.send('https://its.dbdevelopment.tech/notes');
+  })
+
+
+
+
+  app.get('/api/notes/:uuid',  function (req, res) {
+
+    console.log(`uuid`)
+    res.send('uuid')
+  })
   
+
+
+  app.get('/api/notes?date=2023-10-01', authMiddleware, function (req, res) {
+
+    console.log(`data`)
+    res.send('data')
+  })
+
+
+  app.get('/api/notes?limit=2', authMiddleware,  function (req, res) {
+
+    console.log(`note limitate`)
+    res.send('note limitate')
+  })
+
+
+  app.post('/api/notes', authMiddleware,  function (req, res) {
+
+    console.log(`aggiungi nota`)
+    res.send('aggiungi nota')
+  })
+
+
+  app.put('/api/notes', authMiddleware, function (req, res) {
+
+    console.log(`aggiorna nota`)
+    res.send('aggiorna nota')
+  })
+
+
+  app.get('/api/admin/user-stats/:user',  function (req, res) {
+
+    console.log(`note utente`)
+    res.send('note utente')
+  })
+
+
+
   app.get('/test', logMiddleware, (request,response)=> 
     response
     .status(200)
@@ -29,57 +82,17 @@ app.get('/', authMiddleware, function (req, res) {
   )
 
   
-  app.get('/p', logMiddleware, (request,response)=> 
-  response
-  .send(result)
-  
-  
-  
-)
 
-  app.get('/api/notes', (request,response)=> 
-  response
-  .status(200)
-  .json ({
-    "success": true,
-  "list": true,
-  "data": 1
-})
-)
-
-
-app.get('/api/prova', (request,response)=> 
-  response
-  .status(200)
-  .json ({
-    "success": true,
-  "list": true,
-  "data": 1,
-  
-})
-
-)
-
-app.get('/api/notes/:uuid', (request,response)=> 
-    response
-    .status(200)
-    .json ({
-      'data':'Valore',
-      'status':'Ok',
-      "value": 1,
-    })
-  )
 
 
   //per gestire tutto il resto
   app.all('*', (request, response)=>{
-    console.log(`sei in una risorsa non corretta`)
     response
     .status(500)
     .json ({
-      'success':'False',
-      'code':'1001',
-      "message": 'Risorsa non disponbiile',
+      "success": false,
+    "code": 1001,
+    "error": "Resource not found"
     })
   })
 
