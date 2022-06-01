@@ -2,6 +2,7 @@ import axios from 'axios';
 import fs from 'fs';
 import process from 'process';
 
+
 const notesLoader = async function() {
     try{
         const res = await axios({
@@ -22,6 +23,8 @@ const notesLoader = async function() {
     }
     
 }
+
+
 
 export {
     notesLoader

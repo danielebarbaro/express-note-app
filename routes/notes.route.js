@@ -1,26 +1,11 @@
 import express from 'express';
 const router = express.Router();
-import * as fs from 'fs';
 import auth from '../middlewares/auth.middleware.js';
 import * as core from "../services/core.service.js";
 import logMiddleware from "../middlewares/log.middleware.js";
 import {saveNote, notesLoader} from '../services/note.service.js';
 import {param, query, validationResult } from 'express-validator';
-
-
-
-//funziona
-const generateUUID = () => {
-    
-    var dt = new Date().getTime();
-    var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-        var r = (dt + Math.random()*16)%16 | 0;
-        dt = Math.floor(dt/16);
-        return (c=='x' ? r :(r&0x3|0x8)).toString(16);
-    });
-    return uuid;
-    
-}
+import {v4 as generateUUID} from 'uuid';
 
 router.get('/init', logMiddleware,(req, res) => {
     try{

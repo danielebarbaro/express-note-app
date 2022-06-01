@@ -19,10 +19,6 @@ adminsRoute.get(`/api/admin/user-stats/:user`, param('user').isIn(usernames), au
             error: "Username non trovato"
         }
         code = 400
-        // res.status(400).json({
-        //     success: false,
-        //     error: "Username non trovato"
-        // })
     }
     else {
         let notes = notesLoader();
