@@ -1,4 +1,4 @@
-stree# ExpressJs Note APP
+# ExpressJs Note APP
 Creare un server che permetta di gestire un app di note con [express-js](https://expressjs.com/it/)
 
 ### Note:
@@ -92,7 +92,7 @@ La chiamata deve salvare il data in `database/githubnotes.json`.
     ```
      
 * [GET] - `api/notes?date=2023-10-01` - Restituisce tutte le note con data maggiore di `date`
-  * La rotta **DEVE** essere Autenticata
+  * ~La rotta **DEVE** essere Autenticata~
   * La risposta della rotta deve essere:
     ```json
     {
@@ -111,7 +111,7 @@ La chiamata deve salvare il data in `database/githubnotes.json`.
     ```
     
 * [GET] - `api/notes?limit=2` - Restituisce un numero di `limit` note
-  * La rotta **DEVE** essere Autenticata
+  * ~La rotta **DEVE** essere Autenticata~
   * Le note devono essere ordinate per data, il limit deve prendere le ultime 2
   * La risposta della rotta deve essere:
     ```json
