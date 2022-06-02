@@ -45,6 +45,8 @@ const noteboard = new core.NoteBoard('./database/githubnotes.json');
 
 
 
+server.use(express.json()); //da spostare nei relativi file quando separo le vaire routes
+
 // Declare routes
 server.get(
     '/api/notes',
@@ -84,20 +86,63 @@ server.post(
     '/api/notes',
     [ logMiddleware, authMiddleware ],
     function (request, reply) {
-        const input = request.body.json();
+        const input = request.body;
         
-        const newNoteUuid = notebook.addNote(input.user, input.date, input.title, input.body);
+        const newNote = noteboard.addNote(input.user, input.date, input.title, input.body);
         
-        if (newNoteUuid === undefined) {
-            reply.sendStatus(304);
+        if (newNote === undefined) {
+            reply.sendStatus(400);
         } else {
-            const note = noteboard.getNote(newNoteUuid);
             reply.status(201).json({
                 success: true,
                 single: true,
                 data: [
-                    note
+                    newNote
                 ]
+            });
+        }
+    }
+);
+
+server.put(
+    '/api/notes/:uuid',
+    [ logMiddleware, authMiddleware ],
+    function (request, reply) {
+        const uuid = request.params.uuid;
+        const input = request.body;
+
+        const updatedNote = noteboard.updateNote(uuid, input.title, input.body);
+
+        if (updatedNote === undefined) {
+            reply.sendStatus(404);
+        } else {
+            reply.status(201).json({
+                success: true,
+                single: true,
+                data: [
+                    updatedNote
+                ]
+            });
+        }
+    }
+);
+
+server.get(
+    '/api/admin/user-stats/:user',
+    [ logMiddleware, authMiddleware ],
+    function (request, reply) {
+        const user = request.params.user;
+
+        const notes = noteboard.getNotesByUser(user);
+
+        if (notes.length === 0) {
+            reply.sendStatus(404);
+        } else {
+            reply.status(201).json({
+                success: true,
+                data: [{
+                    [user]: notes.map( note => ({ date: note.date, title: note.title, body: note.body }) )
+                }]
             });
         }
     }

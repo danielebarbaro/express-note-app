@@ -5,6 +5,11 @@ import * as uuid from 'uuid';
 
 
 
+// Utils
+const subtractDates = (dateA, dateB) => new Date(dateA) - new Date(dateB);
+
+
+
 class NoteBoard {
     
     // Attributes
@@ -25,9 +30,18 @@ class NoteBoard {
     
     
     
+    getNotesByUser (user) {
+        
+        const notes = this.#notesList.filter( note => note && note.user === user );
+        return notes;
+    }
+    
+    
+    
     addNote (user, date, title, body) {
         
         //const noteAlreadyExist = this.#notesList.some( note => note && note.title === title );
+        const noteAlreadyExist = false;
         
         if (!noteAlreadyExist) {
             
@@ -42,16 +56,36 @@ class NoteBoard {
             
             this.#notesList.push(newNote);
             
-            if (this.saveNotes()) {
-                
-                return newNote;
-                
-            }
+            //this.saveNotes();
             
+            return newNote;
+                
         }
         
         return undefined;
         
+    }
+    
+    
+    
+     updateNote (uuid, title, body) {
+
+        //const noteAlreadyExist = this.#notesList.some( note => note && note.title === title );
+        const note = this.getNoteByUuid(uuid);
+
+        if (note) {
+            
+            note.title = title;
+            note.body = body;
+                        
+            //this.saveNotes();
+
+            return note;
+
+        }
+
+        return undefined;
+
     }
     
     
@@ -64,6 +98,8 @@ class NoteBoard {
             
             this.#notesList[noteIndex] = false;
             
+            //this.saveNotes();
+            
             return true;
             
         } else {
@@ -75,11 +111,29 @@ class NoteBoard {
     
     
     
-    listNotes () {
+    listNotes ( limit = -1, sortByDate = false, afterDate, beforeDate ) {
         
-        //const list = this.#notesList.flatMap( note => note ? { uuid: note.uuid, title: note.title } : [] );
-        const list = this.#notesList.filter( note => note );
-        return list;
+        let list = [];
+        
+        if (afterDate !== undefined && beforeDate !== undefined) {
+            list = this.#notesList.filter(note => note && subtractDates(note.date, afterDate) >= 0 && subtractDates(note.date, beforeDate) <= 0 );
+        } else if (afterDate !== undefined) {
+            list = this.#notesList.filter( note => note && subtractDates(note.date, afterDate) >= 0 );
+        } else if (beforeDate !== undefined) {
+            list = this.#notesList.filter( note => note && subtractDates(note.date, beforeDate) <= 0 );
+        } else {
+            list = this.#notesList.filter( note => note );
+        }
+        
+        if (sortByDate) {
+            list.sort( (noteA, noteB) => subtractDates(noteA.date, noteB.date) );
+        }
+        
+        if (limit >= 0) {
+            return list.slice(0, limit);
+        } else {
+            return list;
+        }
         
     }
     
