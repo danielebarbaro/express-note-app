@@ -4,7 +4,7 @@ import auth from '../middlewares/auth.middleware.js';
 import * as core from "../services/core.service.js";
 import logMiddleware from "../middlewares/log.middleware.js";
 import {saveNote, notesLoader} from '../services/note.service.js';
-import {param, query, validationResult } from 'express-validator';
+import {param, query, validationResult, oneOf } from 'express-validator';
 import {v4 as generateUUID} from 'uuid';
 
 router.get('/init', logMiddleware,(req, res) => {
@@ -18,15 +18,55 @@ router.get('/init', logMiddleware,(req, res) => {
     }
 })
 
-router.route('/api/notes')
-    .get(logMiddleware, async (req, res) => {
-            
-            res.status(200).json({
-                "success" : true,
-                "list" : true,
-                "data":notesLoader()
-            })
+router.get('/api/notes', logMiddleware,async (req, res, next) =>{
+    if(!req.query.date && !req.query.limit){
+        res.status(200).json({
+            "success" : true,
+            "list" : true,
+            "data":notesLoader()
         })
+    }else {
+        next();
+    }
+}, auth, oneOf([query('date').trim().isDate(),query('limit').isNumeric()]), logMiddleware,async  (req, res) => {
+    const errors = validationResult(req);
+    if(!errors.isEmpty()){
+        res.status(400).json({
+            success: false,
+            error: errors.array()
+        })
+    }
+    if(req.query.date && !req.query.limit){
+        let date = req.query.date;
+        console.log(date);
+        let filtered = notesLoader().filter(n => new Date(n.date) > new Date(date))
+        console.log()
+        res.status(200).json({
+            "success" : true,
+            "filtered" : true,
+            "data" : [filtered]
+        })
+    }else if (req.query.limit && !req.query.date){
+        let limit = req.query.limit;
+        console.log(limit)
+        let orderedNotes = notesLoader().sort((a,b) =>{
+            new Date(b.date) - new Date(a.date)
+        });
+        res.status(200).json({
+            success: true,
+            data : orderedNotes.slice(-limit)
+        })
+    }
+    else {
+        res.status(400).json({
+            success: false,
+            error: 'Invalid request'
+        })
+    }
+}
+)
+
+router.route('/api/notes')
     .post(auth, logMiddleware,(req, res) => {
 
         let newUUID = generateUUID()
@@ -56,46 +96,6 @@ router.route('/api/notes')
             "title" : newTitle,
             "body" : newBody
         })
-    })
-
-    //funzionano ma non riesco a metterli sullo stesso path di /api/notes senza che venga scavalcata dalla lista di tutte le note
-router.get('/api/notes/date',query('date').trim().isDate(), auth, logMiddleware, (req, res) => {
-        let date = req.query.date;
-        console.log(date);
-        let filtered = notesLoader().filter(n => new Date(n.date) > new Date(date))
-        console.log()
-        const errors = validationResult(req);
-        if(!errors.isEmpty()){
-            res.status(400).json({
-                success: false,
-                error: errors.array()
-            })
-        }
-        res.status(200).json({
-            "success" : true,
-            "filtered" : true,
-            "data" : [filtered]
-        })
-    })
-//funzionano ma non riesco a metterli sullo stesso path di /api/notes senza che venga scavalcata dalla lista di tutte le note
-router.get('/api/notes/limit',query('limit').isNumeric(), auth, logMiddleware, (req, res) =>{
-        const errors = validationResult(req);
-            if(!errors.isEmpty()){
-                res.status(400).json({
-                    success: false,
-                    error: errors.array()
-                })
-            }
-        let limit = req.query.limit;
-        console.log(limit)
-        let orderedNotes = notesLoader().sort((a,b) =>{
-            new Date(b.date) - new Date(a.date)
-        });
-        res.status(200).json({
-            success: true,
-            data : orderedNotes.slice(-limit)
-        })
-
     })
 
 router.route('/api/notes/:uuid')
