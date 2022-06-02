@@ -1,52 +1,101 @@
 import fs from 'fs'
-import {v4 as uuidv4} from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
 
-let notesJson = fs.readFileSync('./database/githubnotes.json')
-const notes = JSON.parse(notesJson.toString()).data;
+let notes = null;
 
-const getAll = () => notes;
+const writeNotes = async() => {
+    let key = await axios.get(process.env.URL).then(resp => resp.data.data);
+    let data = await axios({
+        method: 'post',
+        url: 'https://its.dbdevelopment.tech/notes',
+        data: {
+            "user": `${process.env.USER}`
+        },
+        headers: {
+            'token': `${key}`
+        }
+    }).then(res => {
+        return JSON.stringify(res.data)
+    })
+    fs.writeFileSync('database/githubnotes.json', data)
+    await readNotes();
+}
 
-const getOneById = (uuid) => notes.find(x=>x.id===uuid);
+const readNotes = async () => {
+    try{
+        let notesJson = fs.readFileSync('./database/githubnotes.json')
+        notes = JSON.parse(notesJson.toString()).data;
+    }catch(err){
+        await writeNotes()
+    }
+}
 
-//const getByUser = (user) => notes.filter(x=>x.user===user);
+const getAll = async () => {
+    if (notes === null || notes.isEmpty())
+        await readNotes();
+    return notes
+}
 
-const getFiltered = (date,limit) =>{
-    var data = notes;
+const getOneById = async (uuid) => {
+    if (notes === null || notes.isEmpty())
+        await readNotes();
+    return notes.find(x => x.id === uuid)
+}
+
+const getByUser = async (user) => {
+    if (notes === null || notes.isEmpty())
+        await readNotes();
+    return notes.filter(x => x.user === user)
+}
+
+const getFiltered = async (date, limit) => {
+    if (notes === null || notes.isEmpty())
+        await readNotes();
+    var data = null;
     var jsonReturn = {
         success: true
     }
-    if(date){
+    if (date) {
         jsonReturn.filtered = true;
-        data = data.filter(x=> new Date(date)<new Date(x.date))
+        data = notes.filter(x => new Date(date) < new Date(x.date))
     }
-    if(limit){
-        data = data.sort((a,b)=>new Date(b.date) - new Date(a.date))
-        data = data.slice(data.length-limit,data.length)
+    if (limit) {
+        data = data.sort((a, b) => new Date(b.date) - new Date(a.date))
+        data = data.slice(data.length - limit, data.length)
     }
     jsonReturn.data = data;
     return jsonReturn;
 }
 
-/*const getAdminUserStats = (user) =>{
-    let data = getByUser(user);
-    let datas = data.array.forEach(element => {
-        return {
+const getAdminUserStats = async (user) => {
+    if (notes === null || notes.isEmpty())
+        await readNotes();
+    let userNotes = await getByUser(user);
+    let userNotesTrunk = getNotesTrunk(userNotes);
+    let result = {};
+    result.success = true
+    let userData = {};
+    userData[user] = userNotesTrunk;
+    result.data = [userData]
+    return result;
+}
+
+const getNotesTrunk = (userNotes) =>{
+    let userNotesTrunk = []
+    userNotes.forEach(element => {
+        userNotesTrunk.push({
             date: element.date,
             title: element.title,
             body: element.body
-        }
-    });
-    return {
-        success: true,
-        data: [
-            {
-                user: datas
-            }
-        ]
-    }
-}*/
+        })
+    })
+    return userNotesTrunk;
+}
 
-const createOne = (body) =>{
+const createOne = async (body) => {
+    if (notes === null || notes.isEmpty())
+        await readNotes();
     let item = {
         id: uuidv4(),
         user: body.user,
@@ -58,17 +107,19 @@ const createOne = (body) =>{
 
     let data = JSON.parse(fs.readFileSync('./database/githubnotes.json'))
     data['data'].push(item);
-    data['count']=data['count']+1
-    fs.writeFileSync('./database/githubnotes.json',JSON.stringify(data))
+    data['count'] = data['count'] + 1
+    fs.writeFileSync('./database/githubnotes.json', JSON.stringify(data))
     return item;
 }
 
-const updateOneById = (uuid,body) =>{
+const updateOneById = async (uuid, body) => {
+    if (notes === null || notes.isEmpty())
+        await readNotes();
     var item = getOneById(uuid);
     var jsonReturn = {
-        succes:true,
-        single:true,
-        data:[
+        succes: true,
+        single: true,
+        data: [
             {
                 id: item.id,
                 user: item.user,
@@ -76,18 +127,18 @@ const updateOneById = (uuid,body) =>{
             }
         ]
     }
-    if('title' in body)
+    if ('title' in body)
         jsonReturn.data[0].title = body.title
     else
         jsonReturn.data[0].title = item.title
-    if('body' in body)
+    if ('body' in body)
         jsonReturn.data[0].body = body.body
     else
         jsonReturn.data[0].body = item.body
     return jsonReturn;
 }
 
-const badRequest = () =>{
+const badRequest = () => {
     return {
         success: false,
         code: 2000,
@@ -95,11 +146,13 @@ const badRequest = () =>{
     };
 }
 
-export default{
+export default {
     getAll,
     getOneById,
     getFiltered,
     createOne,
     updateOneById,
-    badRequest
+    badRequest,
+    writeNotes,
+    getAdminUserStats
 }

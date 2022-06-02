@@ -13,7 +13,7 @@ notesRouter.get('/api/notes',
             res.status(200)
             .json({'success' : true,
                 'list' : true,
-                'data' : notesService.getAll()})
+                'data' : await notesService.getAll()})
         else
             next();
     },
@@ -25,7 +25,7 @@ notesRouter.get('/api/notes',
         try{
             validationResult(req).throw()
             res.status(200)
-            .json(notesService.getFiltered(req.query.date,
+            .json(await notesService.getFiltered(req.query.date,
                                         req.query.limit)
                                         )
         }catch(err){
@@ -39,7 +39,7 @@ notesRouter.get('/api/notes',
 notesRouter.get('/api/notes/:uuid',param('uuid').isUUID(),async (req,res)=>{
     try{
         validationResult(req).throw()
-        let note = notesService.getOneById(req.params.uuid)
+        let note = await notesService.getOneById(req.params.uuid)
         if(note)
             res.status(200)
             .json({
@@ -79,7 +79,7 @@ async (req,res)=>{
             .json(notesService.badRequest())
         //Se il body contiene i dati esatti viene creato il nuovo oggetto
         res.status(201)
-        .json(notesService.createOne(req.body))
+        .json(await notesService.createOne(req.body))
     }catch(err){
         res.status(400)
             .json(notesService.badRequest())
@@ -94,12 +94,12 @@ notesRouter.put('/api/notes/:uuid',
             if(('uuid' in req.body) || ('user' in req.body) || ('date' in req.body) || ('created_at') in req.body)
                 res.status(400)
                 .json(notesService.badRequest())
-            var item = getOneById(uuid);
+            var item = await getOneById(uuid);
             if(!item)
                 res.status(404).json({success:false});
             //Se il body contiene solo title and/or body viene aggiornato oggetto
             res.status(200)
-            .json(notesService.updateOneById(req.params.uuid,req.body))  
+            .json(await notesService.updateOneById(req.params.uuid,req.body))  
     }
 )
 
