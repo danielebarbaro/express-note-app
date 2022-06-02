@@ -9,7 +9,7 @@ notesRouter.get('/api/notes',
     async (req,res,next)=>{
         //request non autenticata
         //Se la query string non contiene filtri 
-        if(!req.query.date & !req.query.limit)
+        if(!req.query.date && !req.query.limit)
             res.status(200)
             .json({'success' : true,
                 'list' : true,

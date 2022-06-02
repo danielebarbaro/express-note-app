@@ -32,25 +32,25 @@ const readNotes = async () => {
 }
 
 const getAll = async () => {
-    if (notes === null || notes.isEmpty())
+    if (notes === null || !notes)
         await readNotes();
     return notes
 }
 
 const getOneById = async (uuid) => {
-    if (notes === null || notes.isEmpty())
+    if (notes === null || !notes)
         await readNotes();
     return notes.find(x => x.id === uuid)
 }
 
 const getByUser = async (user) => {
-    if (notes === null || notes.isEmpty())
+    if (notes === null || !notes)
         await readNotes();
     return notes.filter(x => x.user === user)
 }
 
 const getFiltered = async (date, limit) => {
-    if (notes === null || notes.isEmpty())
+    if (notes === null || !notes)
         await readNotes();
     var data = null;
     var jsonReturn = {
@@ -61,15 +61,15 @@ const getFiltered = async (date, limit) => {
         data = notes.filter(x => new Date(date) < new Date(x.date))
     }
     if (limit) {
-        data = data.sort((a, b) => new Date(b.date) - new Date(a.date))
-        data = data.slice(data.length - limit, data.length)
+        data = notes.sort((a, b) => new Date(b.date) - new Date(a.date))
+        data = data.slice(- limit)
     }
     jsonReturn.data = data;
     return jsonReturn;
 }
 
 const getAdminUserStats = async (user) => {
-    if (notes === null || notes.isEmpty())
+    if (notes === null || !notes)
         await readNotes();
     let userNotes = await getByUser(user);
     let userNotesTrunk = getNotesTrunk(userNotes);
@@ -94,7 +94,7 @@ const getNotesTrunk = (userNotes) =>{
 }
 
 const createOne = async (body) => {
-    if (notes === null || notes.isEmpty())
+    if (notes === null || !notes)
         await readNotes();
     let item = {
         id: uuidv4(),
@@ -113,7 +113,7 @@ const createOne = async (body) => {
 }
 
 const updateOneById = async (uuid, body) => {
-    if (notes === null || notes.isEmpty())
+    if (notes === null || !notes)
         await readNotes();
     var item = getOneById(uuid);
     var jsonReturn = {
