@@ -3,13 +3,14 @@ import auth from '../middlewares/auth.middleware.js';
 import logMiddleware from "../middlewares/log.middleware.js";
 import {notesLoader} from "../services/note.service.js";
 import {param, validationResult} from 'express-validator';
-
 const adminsRoute = express.Router();
-const usernames = [];
-notesLoader().forEach(n => usernames.push(n.user))
+
+let usernames = []
+const loaduUsernames = () => notesLoader().forEach(n => usernames.push(n.user))
+
+loaduUsernames()
 //funziona e autentica
 adminsRoute.get(`/api/admin/user-stats/:user`, param('user').isIn(usernames), auth, logMiddleware,(req,res) => {
-    
     const errors = validationResult(req);
     let resJson;
     let code;
