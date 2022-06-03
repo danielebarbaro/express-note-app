@@ -4,13 +4,13 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 import * as core from "../services/core.service.js";
 import {v4 as generateUUID} from 'uuid';
 import {saveNotes, importNotes} from '../services/note.service.js';
-import {param, query, validationResult} from 'express-validator';
+import {oneOf, param, query, validationResult} from 'express-validator';
 
 const notesRoute = express.Router(); 
 
 /* 
-Si ringrazia Simone Oliva per il contributo dato sulla gestione delle rotte con la data e il limite di note, tuttavia ho il suo stesso problema, il path /api/notes
-mi ritorna tutte le note. Si deve usare il path /api/notes/date o /limit
+Si ringrazia Simone Oliva per il contributo dato sulla gestione delle rotte con la data e il limite di note 
+e Lorenzo Avondo per aver aiutato a risolvere il problema delle rotte /notes?=parametro non funzionante
 */
 
 // Inizializza la lista delle note con i dati del file json
@@ -31,19 +31,92 @@ notesRoute.get('/initialize', logMiddleware,(req, res) =>
     }
 })
 
-// Read: Restituisce tutte le note
-notesRoute.route('/api/notes').get(logMiddleware, async (req, res) => 
+// Read: Restituisce tutte le note. Se viene specificato anche il parametro date, restituisce le note create dopo tale data
+// mentre il parametro limit il numero di note da restituire, ordinate dalla più recente.
+notesRoute.get('/api/notes', logMiddleware,async (req, res, next) =>
+{
+    // controllo del path. Caso 1: nessun parametro. /api/notes
+    if(!req.query.date && !req.query.limit)
     {
-            
-            res.status(200).json
-            ({
-                "success" : true,
-                "list" : true,
-                "data": importNotes()
-            })
+        res.status(200)
+        .json
+        ({
+            "success" : true,
+            "list" : true,
+            "data":importNotes()
         })
-        // Create: Crea una nuova nota
-    .post(authMiddleware, logMiddleware,(req, res) => 
+    }
+    else 
+    { 
+        next();
+    }
+    // Usato il metodo trim per rimuovere gli spazi iniziali e finali
+    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim
+    // oneOf: metodo di express-validator che permette di controllare che sia presente almeno uno degli elementi specificati all'interno
+}, 
+authMiddleware, oneOf([query('date').trim().isDate(),query('limit').isNumeric()]), logMiddleware, async (req, res) => 
+    {
+        // validazione dei parametri. Se invalidi -> bad request
+    const error = validationResult(req);
+    if(!error.isEmpty())
+    {
+        res.status(400)
+        .json
+        ({
+            success: false,
+            error: error.array()
+        })
+    }
+    // Caso 2: parametro date.controlla la presenza di ?date=aaaa-mm-gg
+    if(req.query.date && !req.query.limit)
+    {
+        let date = req.query.date;
+        console.log("Notes created after this date: ",date);
+        let filterByDate = importNotes().filter(note => new Date(note.date) > new Date(date))
+        console.log()
+        res.status(200)
+        .json
+        ({
+            "success" : true,
+            "filtered" : true,
+            "data" : [filterByDate]
+        })
+    }
+    // Caso 3: parametro limit.controlla la presenza di ?limit=numeroIntero
+    else if (req.query.limit && !req.query.date)
+    {
+        let limit = req.query.limit;
+        console.log("Returned notes, sorted by most recent: ",limit)
+        let notesByLimit = importNotes().sort((a,b) =>
+        {
+            // ordina le note in ordine decrescente. preso da: https://www.codegrepper.com/code-examples/javascript/
+            //                                                 sort+of+array+in+descending+order+in+nodejs
+            new Date(b.date) - new Date(a.date)
+        });
+        res.status(200)
+        .json
+        ({
+            success: true,
+            // lascia solo il numero di note richiesto. Fonte: https://developer.mozilla.org/en-US/docs/Web/JavaScript/
+            //                                                 Reference/Global_Objects/Array/slice?retiredLocale=it
+            data : notesByLimit.slice(-limit)
+        })
+    }
+    else 
+    {
+        res.status(400)
+        .json
+        ({// errore bad request se i parametri non sono validi
+
+            success: false,
+            error: 'Bad request'
+        })
+    }
+})
+
+    
+    // Create: Crea una nuova nota
+notesRoute.route('/api/notes').post(authMiddleware, logMiddleware,(req, res) => 
     {
         // generateUUID consente di generare un UUID al momento della creazione. E' stato preso da https://www.npmjs.com/package/uuid
         let newUUID = generateUUID()
@@ -161,59 +234,5 @@ notesRoute.route('/api/notes/:uuid').get(param('uuid').isLength({min: 36, max:36
     
     })
 
-    // Read: recupera le note con una data successiva a quella passata nell'URL
-    // Usato il metodo trim per rimuovere gli spazi iniziali e finali
-    // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/Trim
-notesRoute.get('/api/notes/date',query('date').trim().isDate(), authMiddleware, logMiddleware, (req, res) => 
-    {
-        let urlDate = req.query.date;
-        console.log("Notes created after this date: ",urlDate);
-        let filterByDate = importNotes().filter(note => new Date(note.date) > new Date(urlDate))
-        console.log()
-        const error = validationResult(req);
-        if(!error.isEmpty())
-        { // Errore bad request se la data non è valida
-            res.status(400).json
-            ({
-                success: false,
-                error: error.array()
-            })
-        }
-        res.status(200).json
-        ({
-            "success" : true,
-            "filtered" : true,
-            "data" : [filterByDate]
-        })
-    })
-
-
-notesRoute.get('/api/notes/limit',query('limit').isNumeric(), authMiddleware, logMiddleware, (req, res) =>
-    {
-        const error = validationResult(req);
-            if(!error.isEmpty())
-            {
-                res.status(400).json
-                ({
-                    success: false,
-                    error: error.array()
-                })
-            }
-        let limit = req.query.limit;
-        console.log("Amount of notes, ordered by most recent: ", limit)
-        let notesByDate = importNotes().sort((a,b) =>
-        {
-            // ordina le note in ordine decrescente. preso da: https://www.codegrepper.com/code-examples/javascript/
-            //                                                 sort+of+array+in+descending+order+in+nodejs
-            new Date(b.date) - new Date(a.date) 
-        });
-        res.status(200).json
-        ({
-            success: true,
-            // lascia solo il numero di note richiesto. Fonte: https://developer.mozilla.org/en-US/docs/Web/JavaScript/
-            //                                                 Reference/Global_Objects/Array/slice?retiredLocale=it
-            data : notesByDate.slice(-limit) 
-        })
-    })
 
 export default notesRoute;
