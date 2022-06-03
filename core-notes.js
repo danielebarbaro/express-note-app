@@ -10,7 +10,7 @@ const subtractDates = (dateA, dateB) => new Date(dateA) - new Date(dateB);
 
 
 
-class NoteBoard {
+class Noteboard {
     
     // Attributes
     #databasePath = '';
@@ -126,7 +126,7 @@ class NoteBoard {
         }
         
         if (sortByDate) {
-            list.sort( (noteA, noteB) => subtractDates(noteA.date, noteB.date) );
+            list.sort( (noteA, noteB) => subtractDates(noteB.date, noteA.date) );
         }
         
         if (limit >= 0) {
@@ -238,6 +238,4 @@ class NoteBoard {
 
 
 
-export {
-    NoteBoard
-}
+export default Noteboard;

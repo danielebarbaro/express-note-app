@@ -1,10 +1,15 @@
 import 'dotenv/config';
 import express from 'express';
 
-import * as core from './core-notes.js';
+import Noteboard from './core-notes.js';
 
 import logMiddleware from './middlewares/log.middleware.js';
 import authMiddleware from './middlewares/auth.middleware.js';
+
+import notesGetRoute from './routes/notes-get.route.js';
+import notesPostRoute from './routes/notes-post.route.js';
+import notesPutRoute from './routes/notes-put.route.js';
+import adminRoute from './routes/admin.route.js';
 
 
 
@@ -41,18 +46,20 @@ const port = parsePort();
 // Setup
 const server = express();
 
-const noteboard = new core.NoteBoard('./database/githubnotes.json');
+//const noteboard = new Noteboard('./database/githubnotes.json');
+server.locals.noteboard = new Noteboard('./database/githubnotes.json'); //this way the "noteboard" should be accessible in all components of the app
 
 
 
-server.use(express.json()); //da spostare nei relativi file quando separo le vaire routes
+server.use( logMiddleware );
 
 // Declare routes
+/*
 server.get(
     '/api/notes',
     logMiddleware,
     function (request, reply) {
-        const notes = noteboard.listNotes();
+        const notes = server.locals.noteboard.listNotes();
         
         reply.status(200).json({
             success: true,
@@ -66,7 +73,7 @@ server.get(
     '/api/notes/:uuid',
     logMiddleware,
     function (request, reply) {
-        const note = noteboard.getNote(request.params.uuid);
+        const note = server.locals.noteboard.getNote(request.params.uuid);
         
         if (note === undefined) {
             reply.sendStatus(404);
@@ -81,14 +88,18 @@ server.get(
         }
     }
 );
+*/
 
+server.use('/api/notes', notesGetRoute);
+
+/*
 server.post(
     '/api/notes',
     [ logMiddleware, authMiddleware ],
     function (request, reply) {
         const input = request.body;
         
-        const newNote = noteboard.addNote(input.user, input.date, input.title, input.body);
+        const newNote = server.locals.noteboard.addNote(input.user, input.date, input.title, input.body);
         
         if (newNote === undefined) {
             reply.sendStatus(400);
@@ -103,7 +114,11 @@ server.post(
         }
     }
 );
+*/
 
+server.use('/api/notes', notesPostRoute);
+
+/*
 server.put(
     '/api/notes/:uuid',
     [ logMiddleware, authMiddleware ],
@@ -111,7 +126,7 @@ server.put(
         const uuid = request.params.uuid;
         const input = request.body;
 
-        const updatedNote = noteboard.updateNote(uuid, input.title, input.body);
+        const updatedNote = server.locals.noteboard.updateNote(uuid, input.title, input.body);
 
         if (updatedNote === undefined) {
             reply.sendStatus(404);
@@ -126,14 +141,18 @@ server.put(
         }
     }
 );
+*/
 
+server.use('/api/notes', notesPutRoute);
+
+/*
 server.get(
     '/api/admin/user-stats/:user',
     [ logMiddleware, authMiddleware ],
     function (request, reply) {
         const user = request.params.user;
 
-        const notes = noteboard.getNotesByUser(user);
+        const notes = server.locals.noteboard.getNotesByUser(user);
 
         if (notes.length === 0) {
             reply.sendStatus(404);
@@ -147,14 +166,20 @@ server.get(
         }
     }
 );
+*/
 
-server.all('*', function (request, reply) {
-    reply.status(500).json({
-        success: false,
-        code: 1001,
-        message: 'Resource not found'
-    });
-});
+server.use('/api/admin', adminRoute);
+
+server.use(
+    '/',
+    function (request, reply) {
+        reply.status(500).json({
+            success: false,
+            code: 1001,
+            message: 'Resource not found'
+        });
+    }
+);
 
 
 
