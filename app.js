@@ -45,7 +45,7 @@ app.get(
         const notegeneral = function () {
            return fs.readFileSync('database/githubnotes.json')
         }
-        response.json(JSON.parse(note()))       //parse trasforma il bit in dato
+        response.json(JSON.parse(notegeneral()))       //parse trasforma il bit in dato
        
     })
 
