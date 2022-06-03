@@ -1,4 +1,5 @@
 import express from 'express';
+import { body, validationResult } from 'express-validator';
 
 import Noteboard from '../noteboard.js';
 
@@ -12,13 +13,35 @@ const notesPostRoute = express.Router();
 
 notesPostRoute.post( '/', authMiddleware );
 
-notesPostRoute.post( '/', express.json() );
+// Parse JSON handling errors
+notesPostRoute.post(
+    '/',
+    express.json(),
+    function(err, request, reply, next) {
+        if (err instanceof SyntaxError && err.status === 400) {
+            reply.status(400).json({ errors: [{ msg: 'Bad JSON' }] });
+        }
+    }
+);
 
 
 
 notesPostRoute.post(
     '/',
+    
+    // Validation middleware
+    body('user').exists({ checkNull: true, checkFalsy: true }).bail().trim().isLength({ min:1, max: 20 }),
+    body('date').isDate().bail().trim(),
+    body('title').exists({ checkNull: true, checkFalsy: true }).bail().trim().isLength({ min:1, max: 50 }),
+    body('body').exists({ checkNull: true, checkFalsy: true }).bail().isLength({ min:0, max: 500 }),
+    
     function (request, reply) {
+        
+        // Check validation results
+        const errors = validationResult(request);
+        if (!errors.isEmpty()) {
+           return reply.status(400).json({ errors: errors.array() });
+        }
 
         const user = request.body.user;
         const date = request.body.date;

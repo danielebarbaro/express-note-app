@@ -1,4 +1,5 @@
 import express from 'express';
+import { query, param, validationResult } from 'express-validator';
 
 import Noteboard from '../noteboard.js';
 
@@ -28,10 +29,21 @@ notesGetRoute.get(
 
 notesGetRoute.get(
     '/',
+    
+    // Validation middleware
+    query('limit').optional().isInt({ min: 0 }).toInt(),
+    query('date').optional().isDate().toDate(),
+    
     function (request, reply) {
         
-        const limit = request.query.limit || -1;
-        const sortByDate = !!request.query.limit; //if limit is set order result by date
+        // Check validation results
+        const errors = validationResult(request);
+        if (!errors.isEmpty()) {
+           return reply.status(400).json({ errors: errors.array() });
+        }
+        
+        const limit = request.query.limit !== undefined ? request.query.limit : -1;
+        const sortByDate = request.query.limit !== undefined; //if limit is set order result by date
 
         const afterDate = request.query.date || undefined;
         
@@ -49,7 +61,18 @@ notesGetRoute.get(
 
 notesGetRoute.get(
     '/:uuid',
+    
+    // Validation middleware
+    param('uuid').isUUID(),
+    
     function (request, reply) {
+        
+        // Check validation results
+        const errors = validationResult(request);
+        if (!errors.isEmpty()) {
+           return reply.status(400).json({ errors: errors.array() });
+        }
+        
         const note = request.app.locals.noteboard.getNote(request.params.uuid);
         
         if (note === undefined) {
@@ -63,6 +86,7 @@ notesGetRoute.get(
                 ]
             });
         }
+        
     }
 );
 

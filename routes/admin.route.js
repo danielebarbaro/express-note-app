@@ -1,4 +1,5 @@
 import express from 'express';
+import { param, validationResult } from 'express-validator';
 
 import Noteboard from '../noteboard.js';
 
@@ -16,7 +17,17 @@ adminRoute.use( authMiddleware );
 
 adminRoute.get(
     '/user-stats/:user',
+    
+    // Validation middleware
+    param('user').exists({ checkNull: true, checkFalsy: true }).bail().trim().isLength({ min:1, max: 20 }),
+    
     function (request, reply) {
+        
+        // Check validation results
+        const errors = validationResult(request);
+        if (!errors.isEmpty()) {
+           return reply.status(400).json({ errors: errors.array() });
+        }
         
         const user = request.params.user;
 
