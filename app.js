@@ -1,55 +1,19 @@
 import express from "express";
 import 'dotenv/config';
-import body from 'express-validator'
-import * as fs from "fs";
-import axios from 'axios';
-import logMiddleware from './middlewares/log.middleware,js'
+import logMiddleware from './middlewares/log.middleware.js'
+import authMiddleware from './middlewares/auth.middleware.js'
+import notFoundMiddleware from "./middlewares/notfound.middleware.js";
+import getAll from './services/note.service.js'
+import noteRoute from './routes/notes.route.js'
+import adminsRoute from "./routes/admins.route.js";
+import { body, check, validationResult } from "express-validator"
 
 const app = express()
 
-app.use(express.json())
+app.use(logMiddleware)
+app.use(adminsRoute)
+app.use(noteRoute)
 
-app.get(
-    '/init',
-    async (req, res) => {
+app.use(notFoundMiddleware)
 
-            // https://its.dbdevelopment.tech/notes
-            const options = {
-                method: 'post',
-                url: 'https://its.dbdevelopment.tech/notes',
-                headers: {
-                    "token": "v623qo-882097-cpo"
-                },
-                data: {
-                    "user": "@Wayde2112"
-                }
-            };
-            
-            const notes = await axios
-                .request(options)
-                fs.writeFileSync(`./database/githubnotes.json`, JSON.stringify(notes.data))
-
-        res
-            .status(200)
-            .json({
-                "success": true,
-                "list": true,
-                "data": notes                
-            })
-    }
-)
-
-app.get('/api/notes/:uuid', logMiddleware, function (req, res) {
-    const {uuid} = req.params
-    res
-        .status(200)
-        .const('applications/json')
-        .json({
-            status: 'success',
-            code: 123,
-            data: []
-        })
-})
-
-
-app.listen(process.env.PORT || 5005)
+app.listen(process.env.PORT)
