@@ -86,11 +86,11 @@ app.get('/api/notes/:uuid', (req, res) => {
 
 
 app.get('/api/notes?date=2023-10-01', (req, res) => {
-
+  //non so come si fa
 })
 
 app.get('/api/notes?limit=2', authMiddleware, function (req, res) {
-
+  //non so come si fa
   console.log(`note limitate`)
   res.send('note limitate')
 })
@@ -144,12 +144,15 @@ app.put('/api/notes/:uuid', function (req, res) {
   const notes = JSON.parse(rawdata);
   const { id } = req.params;
 
-  const nota = req.body
+  const nota = req.body = {
+    title: 'Corso Node',
+    body: 'Crea app Note',
+  }
   notes[id] = nota
 
   res.status(200).json({ success: true, data: notes })
 
-
+  //non aggiorna la nota, ma la mette in fondo
 
 })
 
