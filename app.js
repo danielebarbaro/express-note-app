@@ -22,28 +22,44 @@ import adminRoute from './routes/admin.route.js';
 
 // DEFAULT CONFIGS
 const defaultPort = 8080;
+const defaultDatabasePath = './database/githubnotes.json'
 
 
+// PARSE ENV
 
-// SETUP
-
-// Parse environment variables (or .env file)
+// Parse port number
 const parsePort = function () {
     if (isPort(process.env.PORT || "")) {
         return process.env.PORT;
     } else {
-        console.warn(`WARNING! Invalid port number in environment variable. Falling back to default ${defaultPort}.`);
+        console.warn(`WARNING! Invalid or no port number specified in environment variables. Falling back to default ${defaultPort}`);
         return defaultPort;
     }
 }
 
 const port = parsePort();
 
+// Parse path to notes database
+const parseDatabasePath = function () {
+    if (!!process.env.NOTES_DATABASE_PATH) { //Needs some better validation...
+        return process.env.NOTES_DATABASE_PATH;
+    } else {
+        console.warn(`WARNING! Invalid or no database path specified in environment variables. Falling back to default "${defaultDatabasePath}"`);
+        return defaultDatabasePath;
+    }
+}
+
+const databasePath = parseDatabasePath();
+
+
+
+// SETUP
+
 // Create express server
 const server = express();
 
 // Create noteboard
-server.locals.noteboard = new Noteboard('./database/githubnotes.json'); //this way the "noteboard" should be accessible in all components of the app
+server.locals.noteboard = new Noteboard(databasePath); //this way the "noteboard" should be accessible in all components of the app
 
 
 

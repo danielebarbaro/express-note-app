@@ -2,10 +2,11 @@
 
 // Built-in
 import https from 'https';
+import path from 'path';
+import * as fs from 'fs';
 
 // Packages
 import 'dotenv/config';
-import isPort from 'validator/lib/isPort.js';
 
 
 
@@ -14,6 +15,7 @@ const envUrl = process.env.REMOTE_URL;
 const envUser = process.env.REMOTE_USER;
 const envToken = process.env.REMOTE_TOKEN;
 
+const envPath = process.env.NOTES_DATABASE_PATH;
 
 
 // CONFIG
@@ -26,8 +28,6 @@ const requestBody = JSON.stringify({
 */
 
 const requestBody = '{"user": "@D4n13l3Q"}';
-
-console.log(requestBody);
 
 const requestOptions = {
     hostname: parsedUrl.hostname,
@@ -43,41 +43,7 @@ const requestOptions = {
 
 
 
-
-const request = https.request(
-    requestOptions,
-    function (response) {
-        
-        console.log('statusCode:', response.statusCode);
-        console.log('headers:', response.headers);
-        
-        response.setEncoding('utf8');
-        
-        let returnData = '';
-        response.on('data', (chunk) => returnData += chunk );
-        
-        response.on('end', () => {
-            console.log(JSON.parse(returnData));
-        });
-        
-        response.on('error', (error) => console.error(error) );
-        
-    }
-);
-
-
-
-request.on('error', (error) => console.error(error) );
-
-
-
-request.write(requestBody);
-request.end();
-
-console.log("FINE");
-
-
-
+// REQUEST FUNCTION
 function doRequest() {
     
     return new Promise(
@@ -88,8 +54,8 @@ function doRequest() {
                 requestOptions,
                 function (response) {
                     
-                    console.log('statusCode:', response.statusCode);
-                    console.log('headers:', response.headers);
+                    //console.log('statusCode:', response.statusCode);
+                    //console.log('headers:', response.headers);
                     
                     response.setEncoding('utf8');
                     
@@ -115,10 +81,49 @@ function doRequest() {
 
 
 
-const getJSON = async function () {
+// RETRIEVE NOTES FUNCTION
+const retrieveNotes = async function () {
 
     const responseBody = await doRequest();
-
     
-
+    let responseJSON;
+    
+    try {
+        responseJSON = JSON.parse(responseBody);
+    } catch {
+        responseJSON = undefined;
+    }
+    
+    const notesList = responseJSON.data || undefined;
+    
+    if (notesList !== undefined) {
+        
+        const databasePath = path.resolve(path.normalize(envPath));
+        
+        const dataJSON = JSON.stringify(notesList);
+        
+        try {
+            
+            fs.writeFileSync(databasePath, dataJSON);
+            
+            console.log(`Notes list updated from "${envUrl}"`);
+            
+        } catch (error) {
+            
+            console.error(`ERROR: Could not write to "${envPath}"`);
+            //console.error(error);
+            
+        }
+        
+    } else {
+        
+        console.error(`ERROR: Could not retrieve notes from "${envUrl}"`);
+        
+    }
+    
 }
+
+
+
+// RETRIEVE NOTES
+retrieveNotes();
