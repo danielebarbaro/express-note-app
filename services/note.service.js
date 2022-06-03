@@ -4,7 +4,7 @@ import axios from 'axios';
 
 let notes = null;
 
-const writeNotes = async() => {
+const writeNotes = async () => {
     let key = await axios.get(process.env.URL).then(resp => resp.data.data);
     let data = await axios({
         method: 'post',
@@ -23,35 +23,39 @@ const writeNotes = async() => {
 }
 
 const readNotes = async () => {
-    try{
+    try {
         let notesJson = fs.readFileSync('./database/githubnotes.json')
         notes = JSON.parse(notesJson.toString()).data;
-    }catch(err){
+    } catch (err) {
         await writeNotes()
     }
 }
 
 const getAll = async () => {
-    if (notes === null || !notes)
+    if (notes === null || !notes) {
         await readNotes();
+    }
     return notes
 }
 
 const getOneById = async (uuid) => {
-    if (notes === null || !notes)
+    if (notes === null || !notes) {
         await readNotes();
+    }
     return notes.find(x => x.id === uuid)
 }
 
 const getByUser = async (user) => {
-    if (notes === null || !notes)
+    if (notes === null || !notes) {
         await readNotes();
+    }
     return notes.filter(x => x.user === user)
 }
 
 const getFiltered = async (date, limit) => {
-    if (notes === null || !notes)
+    if (notes === null || !notes) {
         await readNotes();
+    }
     var data = null;
     var jsonReturn = {
         success: true
@@ -61,7 +65,7 @@ const getFiltered = async (date, limit) => {
         data = notes.filter(x => new Date(date) < new Date(x.date))
     }
     if (limit) {
-        data = notes.sort((a, b) => new Date(b.date) - new Date(a.date))
+        data = notes.sort((a, b) => new Date(a.date) - new Date(b.date))
         data = data.slice(- limit)
     }
     jsonReturn.data = data;
@@ -69,8 +73,9 @@ const getFiltered = async (date, limit) => {
 }
 
 const getAdminUserStats = async (user) => {
-    if (notes === null || !notes)
+    if (notes === null || !notes) {
         await readNotes();
+    }
     let userNotes = await getByUser(user);
     let userNotesTrunk = getNotesTrunk(userNotes);
     let result = {};
@@ -81,7 +86,7 @@ const getAdminUserStats = async (user) => {
     return result;
 }
 
-const getNotesTrunk = (userNotes) =>{
+const getNotesTrunk = (userNotes) => {
     let userNotesTrunk = []
     userNotes.forEach(element => {
         userNotesTrunk.push({
@@ -94,8 +99,9 @@ const getNotesTrunk = (userNotes) =>{
 }
 
 const createOne = async (body) => {
-    if (notes === null || !notes)
+    if (notes === null || !notes) {
         await readNotes();
+    }
     let item = {
         id: uuidv4(),
         user: body.user,
@@ -112,10 +118,15 @@ const createOne = async (body) => {
     return item;
 }
 
-const updateOneById = async (uuid, body) => {
-    if (notes === null || !notes)
-        await readNotes();
-    var item = getOneById(uuid);
+const updateOneById = async (item, body) => {
+    //aggiorno valori se presenti
+    if ('title' in body) {
+        item.title = body.title
+    }
+    if ('body' in body) {
+        item.data[0].body = body.body
+    }
+    //creo json risposta
     var jsonReturn = {
         succes: true,
         single: true,
@@ -124,17 +135,20 @@ const updateOneById = async (uuid, body) => {
                 id: item.id,
                 user: item.user,
                 date: item.date,
+                title: item.title,
+                body: item.body,
+                created_at: item.created_at
             }
         ]
     }
-    if ('title' in body)
-        jsonReturn.data[0].title = body.title
-    else
-        jsonReturn.data[0].title = item.title
-    if ('body' in body)
-        jsonReturn.data[0].body = body.body
-    else
-        jsonReturn.data[0].body = item.body
+    //aggiorno database
+    let data = JSON.parse(fs.readFileSync('./database/githubnotes.json'))
+    let notesUpdate = await getAll();
+    notesUpdate = notesUpdate.filter(x => item.id !== x.id);
+    notesUpdate.push(item);
+    data['data'] = notesUpdate;
+    data['count'] = data['count'] + 1
+    fs.writeFileSync('./database/githubnotes.json', JSON.stringify(data))
     return jsonReturn;
 }
 
