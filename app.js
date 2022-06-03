@@ -12,6 +12,21 @@ const port = process.env.PORT
 const app = express()
 app.use(express.json())
 
+
+const noteee = () => {
+  let rawdata = fs.readFileSync('./database/githubnotes.json');
+  let notes = JSON.parse(rawdata).data;
+  return notes
+}
+
+
+
+
+
+
+
+
+
 app.get('/init', async (req, res) => {
 
   const options = {
@@ -36,22 +51,42 @@ app.get('/init', async (req, res) => {
 
 app.get('/api/notes', (req, res) => {
 
-  let rawdata = fs.readFileSync('./database/githubnotes.json');
-  let notes = JSON.parse(rawdata);
+  const notess = noteee()
+  const {limit}=req.query
+  const {date}=req.query
 
 
-  let nuovenotes = notes.data.map((note) => {
-    const { id, user, date, title, body } = note
-    return { id, user, date, title, body }
-  })
 
-  if (!nuovenotes) {
-    res.send(`errore`)
-  } else {
-    res.status(200).json({
-      "success": true,
-      "list": true, "data": nuovenotes
+
+  /*console.log(date)
+
+  const dataJson=notess.date
+  //2023-10-01
+  if(dataJson>date){
+    res.status(200).json(notess)
+  }*/
+  
+  if(!limit){
+    let nuovenotes = notess.map((note) => {
+      const { id, user, date, title, body } = note
+      return { id, user, date, title, body }
     })
+  
+    if (!nuovenotes) {
+      res.send(`errore`)
+    } else {
+      res.status(200).json({
+        "success": true,
+        "list": true, "data": nuovenotes
+      })
+  
+    }
+  }else{
+    let noteFiltrate=[...notess]
+    if(limit){
+      noteFiltrate=noteFiltrate.slice(0,Number(limit))
+    }
+    res.status(200).json(noteFiltrate)
 
   }
 
@@ -59,11 +94,10 @@ app.get('/api/notes', (req, res) => {
 
 app.get('/api/notes/:uuid', (req, res) => {
 
-  const rawdata = fs.readFileSync('./database/githubnotes.json');
-  const notes = JSON.parse(rawdata);
+  const notess = noteee()
   const { uuid } = req.params;
 
-  const nuovenotes = notes.data.map((note) => {
+  const nuovenotes = notess.map((note) => {
     const { id, user, date, title, body } = note
     return { id, user, date, title, body }
   })
@@ -81,27 +115,19 @@ app.get('/api/notes/:uuid', (req, res) => {
       });
 
   }
+
+  console.log(req.params)
 })
 
 
-
-app.get('/api/notes?date=2023-10-01', (req, res) => {
-  //non so come si fa
-})
-
-app.get('/api/notes?limit=2', authMiddleware, function (req, res) {
-  //non so come si fa
-  console.log(`note limitate`)
-  res.send('note limitate')
-})
 
 app.post('/api/notes', authMiddleware, function (req, res) {
   //aggiungi nota da autenticare
 
-  const rawdata = fs.readFileSync('./database/githubnotes.json');
-  const notes = JSON.parse(rawdata).data;
+  
 
 
+  const notess = noteee()
 
 
   const uuidGenerato = randomUUID();
@@ -121,9 +147,9 @@ app.post('/api/notes', authMiddleware, function (req, res) {
   //unisce i tre
   var obj = Object.assign(uuidnota, nota, datanota)
 
-  notes.push(obj)
+  notess.push(obj)
 
-  console.log(notes)
+  console.log(notess)
 
 
 
@@ -140,17 +166,16 @@ app.post('/api/notes', authMiddleware, function (req, res) {
 })
 
 app.put('/api/notes/:uuid', function (req, res) {
-  const rawdata = fs.readFileSync('./database/githubnotes.json');
-  const notes = JSON.parse(rawdata);
+ const note=noteee()
   const { id } = req.params;
 
   const nota = req.body = {
     title: 'Corso Node',
     body: 'Crea app Note',
   }
-  notes[id] = nota
+  note[id] = nota
 
-  res.status(200).json({ success: true, data: notes })
+  res.status(200).json({ success: true, data: note })
 
   //non aggiorna la nota, ma la mette in fondo
 
