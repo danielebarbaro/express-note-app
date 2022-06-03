@@ -8,19 +8,9 @@ import { json } from "express";
 import { raw } from "express";
 import { randomUUID } from 'crypto'
 
-
-const port = process.env.port
+const port = process.env.PORT
 const app = express()
 app.use(express.json())
-
-
-
-app.get('/', function (req, res) {
-
-
-  res.send('notes')
-})
-
 
 app.get('/init', async (req, res) => {
 
@@ -55,10 +45,15 @@ app.get('/api/notes', (req, res) => {
     return { id, user, date, title, body }
   })
 
-  res.status(200).json({
-    "success": true,
-    "list": true, "data": nuovenotes
-  })
+  if (!nuovenotes) {
+    res.send(`errore`)
+  } else {
+    res.status(200).json({
+      "success": true,
+      "list": true, "data": nuovenotes
+    })
+
+  }
 
 })
 
@@ -131,7 +126,14 @@ app.post('/api/notes', authMiddleware, function (req, res) {
   console.log(notes)
 
 
-  res.status(201).send(nota)
+
+  if (!nota) {
+    res.send(`errore`)
+  } else {
+
+    res.status(201).send(nota)
+
+  }
 
 
 
@@ -141,34 +143,15 @@ app.put('/api/notes/:uuid', function (req, res) {
   const rawdata = fs.readFileSync('./database/githubnotes.json');
   const notes = JSON.parse(rawdata);
   const { id } = req.params;
- 
-  const nota=req.body
-  notes[id]=nota
 
-  res.status(200).json({success:true, data:notes})
-  
+  const nota = req.body
+  notes[id] = nota
 
-  
+  res.status(200).json({ success: true, data: notes })
+
+
+
 })
-
-
-
-
-
-app.get('/test', logMiddleware, (request, response) =>
-  response
-    .status(200)
-    .json({
-      'data': 'Valore',
-      'status': 'Ok',
-      "value": 1,
-    })
-    .response.send(result)
-
-)
-
-
-
 
 
 //per gestire tutto il resto
