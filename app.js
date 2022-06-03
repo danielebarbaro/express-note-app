@@ -6,7 +6,7 @@ import express from 'express';
 import isPort from 'validator/lib/isPort.js';
 
 // Noteboard
-import Noteboard from './core-notes.js';
+import Noteboard from './noteboard.js';
 
 // Express Middlewares
 import logMiddleware from './middlewares/log.middleware.js';

@@ -1,6 +1,6 @@
 import express from 'express';
 
-import Notebook from '../core-notes.js';
+import Noteboard from '../noteboard.js';
 
 import logMiddleware from '../middlewares/log.middleware.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
