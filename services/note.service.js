@@ -1,5 +1,15 @@
 import fs from 'fs';
 import { v4 as uuidv4 } from 'uuid';
+import axios from 'axios';
+
+// In caso di badRequest
+const badRequest = () => {
+    return {
+        success: false,
+        code: 2000,
+        error: "Bad request"
+    }
+}
 
 // Restituisce tutte le note
 const getAll = function () {
@@ -43,24 +53,65 @@ const getNoteByLimit = function (limit) {
     }
 }
 
-const newNote = function (body) {
+// Crea una nuova nota
+const newNote = async function (body) {
     
-    const note = {
-        "id": uuidv4(),
+    let note = {
+        id: uuidv4(),
         user: body.user,
         date: body.date,
         title: body.title,
         body: body.body,
-        //created_at: body.created_at
+        created_at: body.created_at
     }
 
+    let data = JSON.parse(fs.readFileSync('./database/githubnotes.json'))
+    fs.writeFileSync('database/githubnotes.json', JSON.stringify(data))
     return note
 }
 
+// Modifica una nota
+const updateNote = async function (note, body) {
+
+    // Modifica il title
+    if (('title' in body)) {
+        note.title = body.title
+    }
+    // Modifica il body
+    if (('body' in body)) {
+        note.body = body.body
+    }
+
+    let result = {
+        success: true,
+        single: true,
+        data: [
+            {
+                id: note.id,
+                user: note.user,
+                date: note.date,
+                title: note.title,
+                body: note.body,
+                created_at: note.created_at
+            }
+        ]
+    }
+
+    let updated = await getAll()
+    updated = updated.filter(a => a.id !== note.id)
+    updated.push(note)
+
+    fs.writeFileSync('./database/githubnotes.json', JSON.stringify(updated))
+
+    return result
+}
+
 export default {
+    badRequest,
     getAll,
     getNoteByUuid,
     getNoteByDate,
     getNoteByLimit,
-    newNote
+    newNote,
+    updateNote
 }

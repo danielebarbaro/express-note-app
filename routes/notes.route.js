@@ -67,7 +67,6 @@ noteRoute.get(
 noteRoute.post(
     '/api/notes',
     authMiddleware,
-
     body('user').isAlphanumeric(),
     body('date').isDate(),
     body('title').isString(),
@@ -75,10 +74,40 @@ noteRoute.post(
 
     async (req, res) => {
 
+        if(('uuid' in req.body)) {
+            res
+                .status(400)
+                .json(noteService.badRequest())
+        }
+
         res
             .status(201)
-            .json(noteService.newNote(body))
+            .json(noteService.newNote(req.body))
     }
+)
+
+// [PUT] - api/notes/:uuid - Aggiorna la nota
+noteRoute.put(
+    '/api/notes/:uuid',
+    authMiddleware,
+
+    async (req, res) => {
+        let note = await noteService.getNoteByUuid(req.params.uuid)
+        // Controllo la presenza dei campi corretti
+        if (('uuid' in req.body) || ('user' in req.body) ||
+            ('date' in req.body) || ('created_at' in req.body)
+            ) {
+                res
+                    .status(400)
+                    .json(noteService.badRequest())
+            }
+        else {
+            res 
+                .status(200)
+                .json(await noteService.updateNote(note, req.body))
+        }    
+    }
+
 )
 
 export default noteRoute

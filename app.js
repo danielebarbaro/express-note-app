@@ -10,10 +10,11 @@ import { body, check, validationResult } from "express-validator"
 
 const app = express()
 
+app.use(express.json())
 app.use(logMiddleware)
 app.use(adminsRoute)
 app.use(noteRoute)
 
 app.use(notFoundMiddleware)
 
-app.listen(process.env.PORT)
+app.listen(process.env.PORT || 3000)
