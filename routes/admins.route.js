@@ -7,11 +7,11 @@ const adminsRoute = express.Router();
 
 const writeNotes = function (notes) {
     const data = JSON.stringify(notes)
-    fs.readFileSync('database/githubnotes.json', data)
+    fs.writeFileSync('database/githubnotes.json', data)
 }
 
 adminsRoute.get(
-    '/admin/init',
+    '/init',
     async (req, res) => {
 
         // https://its.dbdevelopment.tech/notes

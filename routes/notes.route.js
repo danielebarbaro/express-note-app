@@ -3,6 +3,7 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 import axios from 'axios';
 import noteService from '../services/note.service.js';
 import fs from 'fs';
+import { body, check, oneOf, param, query, validationResult } from 'express-validator';
 
 const noteRoute = express.Router();
 
@@ -11,7 +12,7 @@ noteRoute.get(
     '/api/notes',
     function (req, res, next) {
 
-        if (!req.query.date && req.query.limit) {
+        if (!req.query.date && !req.query.limit) {
             
             res
                 .status(200)
@@ -42,6 +43,41 @@ noteRoute.get(
                     "data": (noteService.getNoteByLimit(req.query.limit))
                 })
         }
+    }
+)
+
+// [GET] - api/notes/:uuid - Restituisce la nota con uuid passato come parametro
+noteRoute.get(
+    '/api/notes/:uuid',
+    function(req, res) {
+
+        const { uuid } = req.params
+        res
+            .status(200)
+            .contentType('application/json')
+            .json({
+                "status": 'success',
+                "single": true,
+                "data": (noteService.getNoteByUuid(uuid))
+            })
+    }
+)
+
+// [POST] - api/notes - Aggiunge una nota
+noteRoute.post(
+    '/api/notes',
+    authMiddleware,
+
+    body('user').isAlphanumeric(),
+    body('date').isDate(),
+    body('title').isString(),
+    body('body').isString(),
+
+    async (req, res) => {
+
+        res
+            .status(201)
+            .json(noteService.newNote(body))
     }
 )
 

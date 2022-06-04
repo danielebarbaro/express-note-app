@@ -1,4 +1,5 @@
 import fs from 'fs';
+import { v4 as uuidv4 } from 'uuid';
 
 // Restituisce tutte le note
 const getAll = function () {
@@ -22,35 +23,44 @@ const getNoteByUuid = function (uuid) {
     }
 }
 
+// Restituisce la nota con "?date="
 const getNoteByDate = function (date) {
     try {
         const note = JSON.parse(fs.readFileSync('database/githubnotes.json'))
-        const result = note.toString()
-
-        let data = JSON.parse(result).data;
-        data = data.filter(note => new Date(note.date) > new Date(date))
-        
-        return data;
+        return note.data.filter(note => new Date(note.date) > new Date(date))
     } catch (e) {
         return[]
     }
 }
 
+// Restituisce la nota con "?limit="
 const getNoteByLimit = function (limit) {
     try {
-        const note = fs.readFileSync('database/githubnotes.json')
-        const result = JSON.parse(note.toString()).data
-        const data = result.sort((a, b) => new Date(b.date) - new Date(a.date))
-        data = data.slice(-limit)
-        return data
+        const note = JSON.parse(fs.readFileSync('database/githubnotes.json'))
+        return note.data.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(-limit)
     } catch (e) {
         return []
     }
+}
+
+const newNote = function (body) {
+    
+    const note = {
+        "id": uuidv4(),
+        user: body.user,
+        date: body.date,
+        title: body.title,
+        body: body.body,
+        //created_at: body.created_at
+    }
+
+    return note
 }
 
 export default {
     getAll,
     getNoteByUuid,
     getNoteByDate,
-    getNoteByLimit
+    getNoteByLimit,
+    newNote
 }

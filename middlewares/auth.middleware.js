@@ -1,5 +1,5 @@
 const authMiddleware = ( req, res, next ) => {
-    const { headers } = request;
+    const { headers } = req;
 
     if (headers['secret'] === process.env.API_KEY) {
         next();
