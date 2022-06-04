@@ -50,7 +50,6 @@ const data = fs.readFileSync('database/githubnotes.json', 'utf8')
 const notes = JSON.parse(data)
 
 app.get('/api/notes', (req, res) => {
-  
   res.status(200).json({
     "succes": true,
     "list": true,
@@ -61,7 +60,6 @@ app.get('/api/notes', (req, res) => {
 
 app.get('/api/notes/:id', (req, res) => {
   const {id} = req.params
-
   const noteById = notes.find((note) => note.id === id)
 
   res
@@ -80,14 +78,8 @@ app.get('/api/notes', (req, res) => {
   const {query} = req.query
   let noteFilterDate = notes
 
-  let dataQueryParsed = Date.parse(query)
-
   if(query){
-    noteFilterDate = noteFilterDate.filter((note) => {
-      let dataNota = Date.parse(note.data)
-      if(dataQueryParsed < dataNota)
-      return note
-    })
+    noteFilterDate = noteFilterDate.filter((note) => new Date(note.data) > new Date(query))
   }
 
   res.status(200).json({
@@ -133,8 +125,9 @@ app.put('api/notes/:id', (req, res) => {
   const title = req.body.title
   const body = req.body.body
 
-  notes[notes.length - 1] = title
-  notes[notes.length - 1] = body
+  notes[notes.length - 1].title = title
+  notes[notes.length - 1].body = body
+
   res.status(200).json({
     "succes": true,
     "title": title,
