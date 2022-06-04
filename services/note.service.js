@@ -13,10 +13,6 @@ const loadnote = (uuid) => {
 }
 
 
-const findnote = function (notes, title) {
-    return notes.find(note => note.title === title);
-}
-
 const savenote = function (notes) {
     const dataJSON = JSON.stringify(notes)
     fs.writeFileSync('database/githubnotes.json', dataJSON)
@@ -49,7 +45,6 @@ const badrequest = function() {
     
 export{
     loadnote,
-    findnote,
     writenote,
     savenote,
     badrequest,

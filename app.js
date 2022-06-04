@@ -50,27 +50,26 @@ app.get(
     })
 
 //[GET] - api/notes/:uuid - Restituisce la nota con uuid passato come parametro
+/*in questa richiesta ho preso spunto dal repository notes, core-notes e mi sono fatto
+ aiutare da Simone Oliva per aggiustare il codice precedente*/
 app.get(
     '/api/notes/:uuid',
-    param('uuid').isUUID(),
     [ logMiddleware],
 async (request, response)=> {
-const find = function(){
-    validationResult(request).throw()
-    const uuid= nn.loadnote(request.params.uuid);
-}
-if(uuid)
-response.status(200)
-.json({
-    "success": true,
-    "single": true,
-    "data" : uuid
-})     
-else{
-    response.status(403)
-    .json(nn.badrequest())
-}
+    
+    const {uuid}=request.params
+
+    const load = nn.loadnote();
+    
+    response.status(200)
+    .json({
+        "success": true,
+        "single": true,
+        "data" : load.find(note => note.id === uuid)
+    })     
+
 })
+
 
 //[GET] - api/notes?date=2023-10-01 - Restituisce tutte le note con data maggiore di date
 //ho provato a farlo, ho guaradto un po su internet ma non riesco a farlo
@@ -87,23 +86,29 @@ app.get(
 })
 
 //[GET] - api/notes?limit=2 - Restituisce un numero di limit note
+//in questa mi sono fatto aiutare da Simone Oliva 
 app.get(
-    'api/notes?limit=2',
+    'api/notes/?limit=2',
     [authMiddleware],
     (request, response)=> {
-        
-        const limit = function(){
+    
             const datalimit= (nn.loadnote());
             const limit = request.query.limit;
             console.log(limit);
             
-        }
-        response.json(JSON.parse(limit()));
+            response.
+            status(200)
+            .json({
+                "success": true,
+                "data": notes
+            })
 
 
 })
 
+
 //[GET] - api/admin/user-stats/:user - Restituisce tutte le note di un determinato user
+//non riesco a farlo
 app.get(
     '/api/admin/user-stats/:user',
     [authMiddleware],
