@@ -12,6 +12,9 @@ const loadnote = (uuid) => {
     }
 }
 
+const findnote = function (notes, title) {
+    return notes.find(note => note.title === title);
+}
 
 const savenote = function (notes) {
     const dataJSON = JSON.stringify(notes)
@@ -23,8 +26,10 @@ const writenote = function (title, body) {
 
     if (!noteExist) {
         notes.push({
-            title: title,
-            body: body
+            "user": "spacex",
+            "date": "2022-05-20",
+            "title": "Corso Node",
+            "body": "Crea app Note"
         })
         savenote(notes);
         console.log(chalk.green('Nota aggiunta con successo', '\n'));
@@ -45,6 +50,7 @@ const badrequest = function() {
     
 export{
     loadnote,
+    findnote,
     writenote,
     savenote,
     badrequest,

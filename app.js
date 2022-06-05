@@ -119,6 +119,7 @@ app.get(
 
 
 //[POST] - api/notes - Aggiunge una nota
+//preso spunto odal repository notes, core-note
 app.post(
     '/api/notes',
     [authMiddleware],
