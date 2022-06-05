@@ -60,8 +60,23 @@ var retrieveDate = async function (date)
     }
 }
 
+var retriveLimit = async function (limit)
+{
+    try {
+        const LimN = fs.readFileSync('database/githubnotes.json')
+        const RisL = JSON.parse(LimN.toString()).data
+        let data = RisL.sort((a, b) => new Date(b.date) - new Date(a.date))
+        data = data.slice(-limit);
+        return data
+    } catch (e) {
+        return []
+    }
+}
+
+
 export{
     loadNotes,
     UUIDln,
-    retrieveDate
+    retrieveDate,
+    retriveLimit
 }

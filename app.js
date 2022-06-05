@@ -1,5 +1,4 @@
-
-import express, { request, response } from "express";
+import express from "express";
 import 'dotenv/config';
 import logMiddleware from "./middlewares/log.middleware.js";
 import authMiddleware from "./middlewares/auth.middleware.js";
@@ -7,17 +6,20 @@ import {param, query, validationResult} from 'express-validator';
 import axios from "axios";
 import * as fs from 'fs';
 import * as ns from "./services/note.service.js"; 
+import { noMiddleware } from "./middlewares/no.middleware.js";
+var note = ns.loadNotes();
 
 const port = process.env.PORT;
 const app = express()
 app.use(express.json())
+app.use(noMiddleware);
 
 const saveNotes = function (notes) {
     const dataJSON = JSON.stringify(notes)
     fs.writeFileSync('database/githubnotes.json', dataJSON)
 }
 
-app.get('/init', async function(req, res) {
+app.get('/init', async function(res) {
      
         const options = {
             method: 'post',
@@ -41,7 +43,7 @@ app.get('/init', async function(req, res) {
     res.send('Hello World')
 })
 
-app.get('/api/notes', async function (req, res) {
+app.get('/api/notes', logMiddleware, async function (req, res) {
     if(req.query['date']){
         await ns.retrieveDate(req.query['date']).then((value) => {
             res
@@ -55,7 +57,19 @@ app.get('/api/notes', async function (req, res) {
         });
         return;
     }else if(req.query['limit']){
-        console.log('limit');
+        console.log(res, req);
+    await ns.retriveLimit(req.query['limit']).then((value) => {
+        res
+            .status(200)
+            .json({
+                success: 'true',
+                filtered: 'true',
+                data: 
+                    value,
+        });
+    });
+    authMiddleware;
+    return;
     }else{
         res
             .status(200)
@@ -69,7 +83,7 @@ app.get('/api/notes', async function (req, res) {
     }
 });
 
-app.get(`/api/notes/:uuid`, async function (req, res) {
+app.get(`/api/notes/:uuid`, logMiddleware, async function (req, res) {
         
     const uuid = req.params.uuid;
 
@@ -87,24 +101,21 @@ app.get(`/api/notes/:uuid`, async function (req, res) {
         });
 });
 
-app.get(`/api/notes?date`, async function (req, res) {
 
-    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
-        
-    /* const uuid = req.params.uuid;
+app.post('/api/notes',logMiddleware, authMiddleware,(req,res)=>{
 
-    var jsonUUID = {};
-        
-    await ns.UUIDln(uuid).then((value) => jsonUUID = value);
-
+    const PostNotes = req.body;
+    note.push(PostNotes);
     res
-        .status(200)
-        .contentType('application/json')
-        .json({
-            success: 'success',
-            single: 'true',
-            data: jsonUUID,
-        }); */
-});
+    .status(201)
+    .json({
+        "success": true,
+        "data": ''
+    })
+
+
+})
+
+
 
 app.listen(port || 3000)
