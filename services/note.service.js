@@ -72,7 +72,6 @@ const loadNotes = function () {
 
 export {
     addNote,
-    removeNote,
     listNotes,
     readNote
 }

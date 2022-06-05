@@ -71,6 +71,21 @@ app.get('/api/notes/:uuid',logMiddleware, function (request, response) {
 
 })
 
+app.post('/api/notes',(request,response)=>{
+
+    const noteW=request.body
+    note.push(noteW)
+    response.status(201)
+    response.json({
+        "success": true,
+        "data":''
+    })
+
+
+})
+
+
+
 app.get('/api/notes/date',query('date'))
 
 
