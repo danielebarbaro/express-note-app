@@ -41,47 +41,70 @@ app.get('/init', async function(req, res) {
     res.send('Hello World')
 })
 
-app.get('/api/notes', function (req, res) {
-    
+app.get('/api/notes', async function (req, res) {
+    if(req.query['date']){
+        await ns.retrieveDate(req.query['date']).then((value) => {
+            res
+                .status(200)
+                .json({
+                    success: 'true',
+                    filtered: 'true',
+                    data: 
+                        value,
+            });
+        });
+        return;
+    }else if(req.query['limit']){
+        console.log('limit');
+    }else{
+        res
+            .status(200)
+            .json({
+                success: 'true',
+                list: 'true',
+                data: 
+                    (ns.loadNotes())
+        });
+        return;
+    }
+});
+
+app.get(`/api/notes/:uuid`, async function (req, res) {
+        
+    const uuid = req.params.uuid;
+
+    var jsonUUID = {};
+        
+    await ns.UUIDln(uuid).then((value) => jsonUUID = value);
+
     res
         .status(200)
+        .contentType('application/json')
         .json({
-            success: 'true',
-            list: 'true',
-            data: 
-                (ns.loadNotes())
-        })
-    
-})
+            success: 'success',
+            single: 'true',
+            data: jsonUUID,
+        });
+});
 
+app.get(`/api/notes?date`, async function (req, res) {
 
-app.get('/api/notes/:uuid', function (req, res) {
-    
-    const uuid = req.params.uuid;
-    const noteCaricate = (ns.loadNotes());
-    const notef = noteCaricate.filter((req => req === uuid))
-    if(notef === uuid)
-    {
-        res
+    console.log('AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA');
+        
+    /* const uuid = req.params.uuid;
+
+    var jsonUUID = {};
+        
+    await ns.UUIDln(uuid).then((value) => jsonUUID = value);
+
+    res
         .status(200)
+        .contentType('application/json')
         .json({
-            success: 'true',
-            list: 'true',
-            data: notef
-                
-        })
-    }
-    else
-    {
-        res.send("Errore");
-    }
-    
-    
-})
-
-
-
+            success: 'success',
+            single: 'true',
+            data: jsonUUID,
+        }); */
+});
 
 app.listen(port || 3000)
-
-
