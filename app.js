@@ -10,6 +10,8 @@ import logMiddleware from "./middlewares/auth.middleware.js";
 import axios from "axios";
 import { query } from "express";
 
+const port = process.env.PORT
+
 
 const app = express()
 
@@ -46,19 +48,41 @@ app.get('/', async(req, res) => {
 
 })
 
-const data = fs.readFileSync('database/githubnotes.json', 'utf8')
-const notes = JSON.parse(data)
+app.get('/api/notes', authMiddleware, (req, res) => {
+  const dataFile = fs.readFileSync('database/githubnotes.json', 'utf8')
+  const notes = JSON.parse(dataFile)
+  let noteLimit = [...notes]
+  let noteData = notes
+  const {limit} = req.query
+  const {data} = req.query
+  
 
-app.get('/api/notes', (req, res) => {
-  res.status(200).json({
-    "succes": true,
-    "list": true,
-    "data": notes
-  })
+  if(!limit && !data){
+    res.status(200).json({
+      "succes": true,
+      "list": true,
+      "data": notes
+    })
+  } else if(!data && limit){
+    noteLimit = noteLimit.slice(0, Number(limit))
 
+    res.status(200).json({
+      "succes": true,
+      "data": noteLimit
+    })
+  } else(!limit && data)
+   noteData = noteData.filter(note => new Date(note.date) > new Date(data)) 
+   res.status(200).json({
+     "succes": true,
+     "filtered": true,
+     "data": noteData
+
+   })
 })
 
 app.get('/api/notes/:id', (req, res) => {
+  const dataFile = fs.readFileSync('database/githubnotes.json', 'utf8')
+  const notes = JSON.parse(dataFile)
   const {id} = req.params
   const noteById = notes.find((note) => note.id === id)
 
@@ -73,42 +97,9 @@ app.get('/api/notes/:id', (req, res) => {
     })
 })
 
-
-app.get('/api/notes', (req, res) => {
-  const {query} = req.query
-  let noteFilterDate = notes
-
-  if(query){
-    noteFilterDate = noteFilterDate.filter((note) => new Date(note.data) > new Date(query))
-  }
-
-  res.status(200).json({
-    "succes": true,
-    "filtered": true,
-    "data": noteFilterDate
-  })
-
-
-
-})
-
-app.get('/api/notes', (req, res) => {
-
-  const {limit} = req.query
-  let noteLimite = notes
-
-  if(limit){
-    noteLimite = noteLimite.slice(0, Number(limit))
-  }
-
-  res.status(200).json({
-    "succes": true,
-    "data": noteLimite
-  })
-
-})
-
-app.post('/api/notes', (req, res) => {
+app.post('/api/notes', authMiddleware, (req, res) => {
+  const dataFile = fs.readFileSync('database/githubnotes.json', 'utf8')
+  const notes = JSON.parse(dataFile)
   const note = req.body
   notes.push(note)
 
@@ -120,7 +111,9 @@ app.post('/api/notes', (req, res) => {
 
 })
 
-app.put('api/notes/:id', (req, res) => {
+app.put('api/notes/:id', authMiddleware, (req, res) => {
+  const dataFile = fs.readFileSync('database/githubnotes.json', 'utf8')
+  const notes = JSON.parse(dataFile)
   const{id} = req.params
   const title = req.body.title
   const body = req.body.body
@@ -143,4 +136,4 @@ app.put('api/notes/:id', (req, res) => {
 
 
 
-app.listen(3000)
+app.listen(port || 3000)
