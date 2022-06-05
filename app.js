@@ -2,46 +2,23 @@ import express, { response } from "express";
 import 'dotenv/config';
 import authMiddleware from "./middlewares/auth.middleware.js";
 import logMiddleware from "./middlewares/log.middleware.js";
-import * as fs from "fs";
 import axios from "axios";
 import { randomUUID } from 'crypto'
-
+//import nuoveNotes from "./services/core.service.js"
 const port = process.env.port
 const app = express()
 app.use(express.json())
 
-//funzione che prende le note dal file json
-const note = () => {
-  let rawdata = fs.readFileSync('./database/githubnotes.json');
-  let notes = JSON.parse(rawdata).data;
-  return notes
-}
 
-//funzione che ordina le note per data dalla più recente
-const ordinamentoData = (a, b) => {
-  return new Date(b.date).valueOf() - new Date(a.date).valueOf();
-}
-
-const noteOrdinate = () => {
-  const noteOrdinate = note().sort(ordinamentoData)
-  return noteOrdinate
-}
-
-const n = noteOrdinate()
-
-let nuoveNotes = n.map((n) => {
-  const { id, user, date, title, body } = n
-  return { id, user, date, title, body }
-})
 
 //rotta che prende il file json
 app.get('/init', async (req, res) => {
 
   const options = {
     method: 'POST',
-    url: process.env.API_NOTES_LINK,
-    headers: { 'token': process.env.API_NOTES_KEY },
-    data: { 'user': process.env.GITHUB_USER }
+    url: "https://its.dbdevelopment.tech/notes",
+    headers: { 'token': 'g277lc-342332-avi' },
+    data: { 'user': "MrcllBo" }
   }
 
   try {
@@ -54,6 +31,8 @@ app.get('/init', async (req, res) => {
   res.send(`Hai preso il file json contenente le note`)
 
 })
+
+
 
 
 app.get('/api/notes', (req, res) => {
