@@ -10,6 +10,7 @@ Creare un server che permetta di gestire un app di note con [express-js](https:/
  * Il progetto deve avere un middleware di auth
  * Il progetto deve avere un middleware di log per tracciar e tutte le rotte chiamate (`${method}: ${url} [${time}]`)
  * Il progetto deve prendere i dati delle note dall'api `https://its.dbdevelopment.tech/notes`
+ * Utilizzare il file `.env.sample` per gestire le variabili del server
 
 ### Init del progetto
 
@@ -99,7 +100,7 @@ La chiamata deve salvare il data in `database/githubnotes.json`.
     ```
      
 * [GET] - `api/notes?date=2023-10-01` - Restituisce tutte le note con data maggiore di `date`
-  * La rotta **DEVE** essere Autenticata
+  * ~La rotta **DEVE** essere Autenticata~
   * La risposta della rotta deve essere:
     ```json
     {
@@ -118,7 +119,7 @@ La chiamata deve salvare il data in `database/githubnotes.json`.
     ```
     
 * [GET] - `api/notes?limit=2` - Restituisce un numero di `limit` note
-  * La rotta **DEVE** essere Autenticata
+  * ~La rotta **DEVE** essere Autenticata~
   * Le note devono essere ordinate per data, il limit deve prendere le ultime 2
   * La risposta della rotta deve essere:
     ```json
@@ -174,7 +175,7 @@ La chiamata deve salvare il data in `database/githubnotes.json`.
   * lo status code deve essere `200`.
     
 
-* [GET] - `api/admin/user-stats/:user` - Restituisce tutte le note di un determinato `user`
+* [OPZIONALE!!] - [GET] - `api/admin/user-stats/:user` - Restituisce tutte le note di un determinato `user`
    * La rotta **DEVE** essere Autenticata
    * La risposta della rotta deve essere:
   ```json

@@ -1,9 +1,12 @@
 // IMPORTS
 
+// Built-in
+import * as fs from "fs";
+
 // Packages
 import 'dotenv/config';
+import axios from "axios";
 import express from 'express';
-import isPort from 'validator/lib/isPort.js';
 
 // Notes
 import * as core from './core-notes.js';
@@ -19,67 +22,69 @@ import notesPutRoute from './routes/notes-put.route.js';
 import adminRoute from './routes/admin.route.js';
 
 
+// Settings
+const port = process.env.PORT;
+const appSecret = process.env.API_KEY;
+const noteLink = process.env.API_NOTES_LINK;
+const keyLink = process.env.API_KEY_LINK;
+const gitHubUser = process.env.GITHUB_USER;
 
-// DEFAULT CONFIGS
-const defaultPort = 8080;
-const defaultDatabasePath = './database/githubnotes.json'
 
-
-// PARSE ENV
-
-// Parse port number
-const parsePort = function () {
-    if (isPort(process.env.PORT || "")) {
-        return process.env.PORT;
-    } else {
-        console.warn(`WARNING! Invalid or no port number specified in environment variables. Falling back to default ${defaultPort}`);
-        return defaultPort;
-    }
-}
-
-const port = parsePort();
-
-// Parse path to notes database
-const parseDatabasePath = function () {
-    if (!!process.env.NOTES_DATABASE_PATH) { //Needs some better validation...
-        return process.env.NOTES_DATABASE_PATH;
-    } else {
-        console.warn(`WARNING! Invalid or no database path specified in environment variables. Falling back to default "${defaultDatabasePath}"`);
-        return defaultDatabasePath;
-    }
-}
-
-const databasePath = parseDatabasePath();
+const databasePath = 'database/githubnotes.json'
 
 
 
 // SETUP
 
-// Create express server
-const server = express();
+// Create express app
+const app = express();
 
 // Create noteboard
-server.locals.noteboard = new core.loadNotes(databasePath); //this way the "notesboard" should be accessible in all components of the app
+app.locals.noteboard = core.loadNotes(databasePath); //this way the "noteboard" should be accessible in all components of the app
 
 
 
 // ROUTES & MIDDLEWARE
 
+// Init
+app.get('/init', async (request, response) => {
+    const apiSecretResponse = await axios.get(`${keyLink}/${gitHubUser}`).then(r => r.data);
+    const apiSecret = apiSecretResponse.data;
+
+    const notes = await axios({
+        method: 'post',
+        url: noteLink,
+        data: {"user": `${gitHubUser}`},
+        headers: {'token': `${apiSecret}`}
+    }).then(res => {
+        return res.data
+    })
+
+    fs.writeFileSync('database/githubnotes.json', JSON.stringify(notes));
+
+    response
+        .status(204)
+        .json()
+});
+
+
+
+
 // Logs middleware
-server.use( logMiddleware );
+app.use( logMiddleware );
 
 // "/api/notes" GET...
-server.use('/api/notes', notesGetRoute);
+app.use('/api/notes', notesGetRoute);
 // ...POST...
-server.use('/api/notes', notesPostRoute);
+app.use('/api/notes', notesPostRoute);
 // ...and PUT
-server.use('/api/notes', notesPutRoute);
+app.use('/api/notes', notesPutRoute);
 
 // "/api/admin" routes
-server.use('/api/admin', adminRoute);
+app.use('/api/admin', adminRoute);
 
 // Default error for non existent/implemente paths
-server.use(
+app.use(
     //'/',
     function (request, reply) {
         reply.status(500).json({
@@ -92,7 +97,11 @@ server.use(
 
 
 
-// RUN SERVER
-console.log(`Server now listening on port ${port}...`);
 
-server.listen(port);
+// RUN SERVER
+
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(port, () => console.log(`Server listening on port ${port}`));
+}
+
+export default app;
