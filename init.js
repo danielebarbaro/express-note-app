@@ -81,6 +81,25 @@ function doRequest() {
 
 
 
+
+// RENAME ID TO UUID
+const noteID2noteUUID = function (note) {
+    
+    const newNote = {
+        uuid: note.uuid || note.id,
+        user: note.user,
+        date: note.date,
+        title: note.title,
+        body: note.body,
+        created_at: note.created_at
+    };
+    
+    return newNote;
+    
+}
+
+
+
 // RETRIEVE NOTES FUNCTION
 const retrieveNotes = async function () {
 
@@ -94,7 +113,7 @@ const retrieveNotes = async function () {
         responseJSON = undefined;
     }
     
-    const notesList = responseJSON.data || undefined;
+    const notesList = responseJSON.data.map( note => noteID2noteUUID(note) ) || undefined;
     
     if (notesList !== undefined) {
         

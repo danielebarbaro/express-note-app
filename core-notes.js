@@ -19,7 +19,7 @@ const getNoteByUuid = function (notesList, uuid) {
 };
     
 const getNote = function (notesList, uuid) { // Alias for getNoteByUuid()
-    return this.getNoteByUuid(notesList, uuid);
+    return getNoteByUuid(notesList, uuid);
 };
 
 
@@ -178,6 +178,7 @@ const loadNotes = function(databasePath) {
 export {
     loadNotes,
     saveNotes,
+    listNotes,
     getNote,
     getNoteByUuid,
     getNotesByUser,

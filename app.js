@@ -59,7 +59,7 @@ const databasePath = parseDatabasePath();
 const server = express();
 
 // Create noteboard
-server.locals.notesboard = new core.loadNotes(databasePath); //this way the "notesboard" should be accessible in all components of the app
+server.locals.noteboard = new core.loadNotes(databasePath); //this way the "notesboard" should be accessible in all components of the app
 
 
 
