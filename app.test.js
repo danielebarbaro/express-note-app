@@ -5,49 +5,232 @@ it('Testing to see if Jest works', () => {
     expect(true).toBe(true)
 })
 
-it("GET hello", async () => {
-    await supertest(app).get("/hello")
-        .expect(200)
+it("[GET] - Call /init with success", async () => {
+    await supertest(app)
+        .get("/init")
+        .expect(204);
 });
 
-it("GET init", async () => {
-    await supertest(app).get("/init")
+it("[GET] - Call /api/notes with success", async () => {
+    await supertest(app).get("/api/notes")
+        .expect(200)
+        .then((response) => {
+            const result = response.body;
+            expect(result.list).toBeTruthy();
+            expect(result.success).toBeTruthy();
+            expect(result.data.length).toBeGreaterThan(1);
+            expect(Array.isArray(result.data)).toBeTruthy();
+            expect(result.data.shift()).toHaveProperty(
+                'id',
+                'user',
+                'date',
+                'title',
+                'body',
+                'created_at',
+            )
+        });
+});
+
+it("[GET] - Call with a parameter /api/notes/:uuid with success ", async () => {
+    const notes = await supertest(app).get("/api/notes");
+    const note = notes?.body.data.shift();
+    await supertest(app).get(`/api/notes/${note.id}`)
+        .expect(200)
+        .then((response) => {
+            const result = response.body;
+            expect(result.single).toBeTruthy();
+            expect(result.success).toBeTruthy();
+            expect(result.data.length).toBe(1);
+            expect(Array.isArray(result.data)).toBeTruthy();
+            expect(result.data.shift()).toHaveProperty(
+                'id',
+                'user',
+                'date',
+                'title',
+                'body'
+            )
+        });
+});
+
+it("[GET] - Received an error calling /api/notes/:uuid with a wrong parameter ", async () => {
+    await supertest(app).get(`/api/notes/hello`)
+        .expect(500)
+        .then((response) => {
+            const result = response.body;
+            expect(result.code).toBe(1001);
+            expect(result.success).toBeFalsy();
+            expect(result.error).toBe('Resource not found');
+        });
+});
+
+it("[GET] - Received an Unauthorized error calling /api/notes?date=2023-10-01", async () => {
+    await supertest(app).get("/api/notes?date=2021-10-01")
+        .expect(401)
+        .then((response) => {
+            const result = response.body;
+            expect(result.code).toBe(2001);
+            expect(result.success).toBeFalsy();
+            expect(result.error).toBe('Unauthorized');
+        });
+});
+
+it("[GET] - Received an empty result with a date filter /api/notes?date=2093-10-01", async () => {
+    await supertest(app).get("/api/notes?date=2093-10-01")
+        .set({secret: process.env.API_KEY})
+        .expect(200)
+        .then((response) => {
+            const result = response.body;
+            expect(result.filtered).toBeTruthy();
+            expect(result.success).toBeTruthy();
+            expect(result.data.length).toBe(0);
+            expect(Array.isArray(result.data)).toBeTruthy();
+        });
+});
+
+it("[GET] - Received data values from /api/notes?date=2023-10-01", async () => {
+    await supertest(app).get("/api/notes?date=2021-10-01")
+        .set({secret: process.env.API_KEY})
+        .expect(200)
+        .then((response) => {
+            const result = response.body;
+            expect(result.filtered).toBeTruthy();
+            expect(result.success).toBeTruthy();
+            expect(result.data.length).toBeGreaterThan(1);
+            expect(Array.isArray(result.data)).toBeTruthy();
+            expect(result.data.shift()).toHaveProperty(
+                'id',
+                'user',
+                'date',
+                'title',
+                'body',
+            )
+        });
+});
+
+it("[GET] - Received an Unauthorized error calling /api/notes?limit=2", async () => {
+    await supertest(app).get("/api/notes?limit=2")
+        .expect(401)
+        .then((response) => {
+            const result = response.body;
+            expect(result.code).toBe(2001);
+            expect(result.success).toBeFalsy();
+            expect(result.error).toBe('Unauthorized');
+        });
+});
+
+it("[GET] - Received two values calling /api/notes?limit=2", async () => {
+    await supertest(app).get("/api/notes?limit=2")
+        .set({secret: process.env.API_KEY})
+        .expect(200)
+        .then((response) => {
+            const result = response.body;
+            expect(result.success).toBeTruthy();
+            expect(result.data.length).toBe(2);
+            expect(Array.isArray(result.data)).toBeTruthy();
+            expect(result.data.shift()).toHaveProperty(
+                'id',
+                'user',
+                'date',
+                'title',
+                'body',
+            )
+        });
+});
+
+it("[POST] - Received an Unauthorized error calling /api/notes", async () => {
+    await supertest(app).post("/api/notes")
+        .expect(401)
+        .then((response) => {
+            const result = response.body;
+            expect(result.code).toBe(2001);
+            expect(result.success).toBeFalsy();
+            expect(result.error).toBe('Unauthorized');
+        });
+});
+
+it("[POST] - Create a new resource using /api/notes", async () => {
+    await supertest(app)
+        .post("/api/notes")
+        .set({secret: process.env.API_KEY})
+        .send({
+            "user": "spacex",
+            "date": "2022-05-20",
+            "title": "Corso Node",
+            "body": "Crea app Note"
+        })
         .expect(201)
         .then((response) => {
             const result = response.body;
-            expect(result.status).toBe('success');
-            expect(parseInt(result.data.notesCount)).toBeGreaterThan(1);
-            expect(Array.isArray(result.data.notes)).toBeTruthy();
+            console.log(result)
+            expect(result).toHaveProperty(
+                'id',
+                'user',
+                'date',
+                'title',
+                'body',
+            )
         });
-
 });
 
-describe('GET api/notes', () => {
-    // Restituisce tutte le note
-    it.todo('not implemented');
+it("[PUT] - Received an Unauthorized error calling /api/notes/:uuid", async () => {
+    const notes = await supertest(app).get("/api/notes");
+    const note = notes?.body.data.shift();
+    await supertest(app).put(`/api/notes/${note.id}`)
+        .expect(401)
+        .then((response) => {
+            const result = response.body;
+            expect(result.code).toBe(2001);
+            expect(result.success).toBeFalsy();
+            expect(result.error).toBe('Unauthorized');
+        });
 });
 
-describe('GET api/notes/:uuid', () => {
-    // Restituisce la nota con uuid passato come parametro
-    it.todo('not implemented');
+it("[PUT] - Update an existing resource using /api/notes/:uuid", async () => {
+    const notes = await supertest(app).get("/api/notes");
+    const note = notes?.body.data.shift();
+    await supertest(app)
+        .put(`/api/notes/${note.id}`)
+        .set({secret: process.env.API_KEY})
+        .send({
+            "title": "modificato",
+            "body": "modificato"
+        })
+        .expect(200)
+        .then((response) => {
+            const result = response.body;
+            expect(result.single).toBeTruthy();
+            expect(result.success).toBeTruthy();
+            expect(result.data.length).toBe(1);
+            expect(Array.isArray(result.data)).toBeTruthy();
+            expect(result.data.shift()).toHaveProperty(
+                'id',
+                'user',
+                'date',
+                'title',
+                'body'
+            )
+        });
 });
 
-describe('GET api/notes?date=2023-10-01', () => {
-    // Restituisce tutte le note con data maggiore di `date`
-    it.todo('not implemented');
+it("[PUT] - Fail to update a wrong note /api/whatever", async () => {
+    await supertest(app).put(`/api/whatever`)
+        .expect(500)
+        .then((response) => {
+            const result = response.body;
+            expect(result.code).toBe(1001);
+            expect(result.success).toBeFalsy();
+            expect(result.error).toBe('Resource not found');
+        });
 });
 
-describe('GET api/notes?limit=2', () => {
-    // Restituisce un numero di `limit` note
-    it.todo('not implemented');
-});
-
-describe('PUT api/notes/:uuid', () => {
-    // Aggiorna la nota
-    it.todo('not implemented');
-});
-
-describe('POST api/notes/', () => {
-    // Aggiunge una nota
-    it.todo('not implemented');
+it("[GET] - Fail to call note filtered with wrong api-key /api/notes?date=2023-10-01", async () => {
+    await supertest(app).get("/api/notes?date=2021-10-01")
+        .set({secret: 'dummy-key-wrong'})
+        .expect(403)
+        .then((response) => {
+            const result = response.body;
+            expect(result.code).toBe(2002);
+            expect(result.success).toBeFalsy();
+            expect(result.error).toBe('Forbidden');
+        });
 });
