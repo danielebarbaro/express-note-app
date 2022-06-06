@@ -60,7 +60,9 @@ app.get('/init', async (request, response) => {
         return res.data
     })
 
-    fs.writeFileSync('database/githubnotes.json', JSON.stringify(notes));
+    fs.writeFileSync(databasePath, JSON.stringify(notes));
+
+    app.locals.noteboard = notes; //update "app.locals.noteboard" every time the init route is executed
 
     response
         .status(204)
