@@ -1,33 +1,52 @@
- import * as fs from 'fs'
+/*  import * as fs from 'fs'
 
-//const path = './database/githubnotes.json'
 
-const notes=[]
-
-fs.writeFileSync('githubnotes.json', JSON.stringify(notes), "utf-8")
-//if (path) {
   const note = () => {
-    let rawdata = fs.readFileSync('./database/githubnotes.json');
-    let notes = JSON.parse(rawdata).data;
-    return notes
+    try {
+      
+      let rawdata = fs.readFileSync('./database/githubnotes.json');
+      let notes = JSON.parse(rawdata).data;
+      return notes
+    } catch (error) {
+      return []
+    }
   }
 
   //funzione che ordina le note per data dalla più recente
   const ordinamentoData = (a, b) => {
-    return new Date(b.date).valueOf() - new Date(a.date).valueOf();
+    try {
+      
+      return new Date(b.date).valueOf() - new Date(a.date).valueOf();
+    } catch (error) {
+      return []
+    }
   }
 
   const noteOrdinate = () => {
-    const noteOrdinate = note().sort(ordinamentoData)
-    return noteOrdinate
+    try {
+      
+      const noteOrdinate = note().sort(ordinamentoData)
+      return noteOrdinate
+    } catch (error) {
+      return []
+    }
   }
 
   const n = noteOrdinate()
 
   let nuoveNotes = n.map((n) => {
-    const { id, user, date, title, body } = n
-    return { id, user, date, title, body }
+    try {
+      const { id, user, date, title, body } = n
+      return { id, user, date, title, body }
+      
+    } catch (error) {
+      return []
+    }
 
   })
-//}
 
+  export default{
+    nuoveNotes
+  }
+
+ */
