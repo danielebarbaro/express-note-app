@@ -63,7 +63,7 @@ const addNote = function ( notesList, user, date, title, body) {
 const updateNote = function ( notesList, uuid, title, body) {
 
     //const noteAlreadyExist = notesList.some( note => note && note.title === title );
-    const note = this.getNoteByUuid(uuid);
+    const note = getNoteByUuid(notesList, uuid);
 
     if (note) {
         
