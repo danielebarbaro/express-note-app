@@ -74,7 +74,6 @@ app.get('/init', async (request, response) => {
         headers: {'token': `${apiSecret}`}
     }).then(res => {
         return res.data.data.map( note => noteID2noteUUID(note) );
-        //return res.data.data;
     })
 
     fs.writeFileSync(databasePath, JSON.stringify(notes));
