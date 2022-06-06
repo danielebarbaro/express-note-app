@@ -6,7 +6,8 @@ import {param, validationResult} from 'express-validator';
 const adminsRoute = express.Router();
 
 let usernames = []
-const loaduUsernames = () => notesLoader().forEach(n => usernames.push(n.user))
+let notes = notesLoader()
+const loaduUsernames = () => notes.forEach(n => usernames.push(n.user))
 
 loaduUsernames()
 //funziona e autentica
@@ -51,4 +52,7 @@ adminsRoute.get(`/api/admin/note-count`, auth, logMiddleware,(req, res) => {
     });
 });
 
-export default adminsRoute;
+export {
+    adminsRoute,
+    loaduUsernames
+};
