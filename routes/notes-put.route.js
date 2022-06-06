@@ -1,7 +1,8 @@
 import express from 'express';
 import { param, body, validationResult } from 'express-validator';
 
-import Noteboard from '../noteboard.js';
+// Notes
+import * as core from '../core-notes.js';
 
 import authMiddleware from '../middlewares/auth.middleware.js';
 
@@ -47,7 +48,8 @@ notesPutRoute.put(
         const title = request.body.title;
         const body = request.body.body;
 
-        const updatedNote = request.app.locals.noteboard.updateNote(uuid, title, body);
+        //const updatedNote = request.app.locals.noteboard.updateNote(uuid, title, body);
+        const updatedNote = core.updateNote(request.app.locals.noteboard, uuid, title, body);
         
         if (updatedNote === undefined) {
             

@@ -1,7 +1,8 @@
 import express from 'express';
 import { param, validationResult } from 'express-validator';
 
-import Noteboard from '../noteboard.js';
+// Notes
+import * as core from '../core-notes.js';
 
 import authMiddleware from '../middlewares/auth.middleware.js';
 
@@ -31,7 +32,8 @@ adminRoute.get(
         
         const user = request.params.user;
 
-        const notes = request.app.locals.noteboard.getNotesByUser(user);
+        //const notes = request.app.locals.noteboard.getNotesByUser(user);
+        const notes = core.getNotesByUser(request.app.locals.noteboard, user);
 
         if (notes.length === 0) {
         

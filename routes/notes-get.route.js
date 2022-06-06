@@ -1,7 +1,8 @@
 import express from 'express';
 import { query, param, validationResult } from 'express-validator';
 
-import Noteboard from '../noteboard.js';
+// Notes
+import * as core from '../core-notes.js';
 
 import logMiddleware from '../middlewares/log.middleware.js';
 import authMiddleware from '../middlewares/auth.middleware.js';
@@ -47,7 +48,8 @@ notesGetRoute.get(
 
         const afterDate = request.query.date || undefined;
         
-        const notes = request.app.locals.noteboard.listNotes(limit, sortByDate, afterDate);
+        //const notes = request.app.locals.noteboard.listNotes(limit, sortByDate, afterDate);
+        const notes = core.listNotes(request.app.locals.noteboard, limit, sortByDate, afterDate);
         
         reply.status(200).json({
             success: true,
@@ -73,7 +75,8 @@ notesGetRoute.get(
            return reply.status(400).json({ errors: errors.array() });
         }
         
-        const note = request.app.locals.noteboard.getNote(request.params.uuid);
+        //const note = request.app.locals.noteboard.getNote(request.params.uuid);
+        const note = core.getNote(request.app.locals.noteboard, request.params.uuid);
         
         if (note === undefined) {
             reply.sendStatus(404);

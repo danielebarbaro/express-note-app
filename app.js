@@ -5,8 +5,8 @@ import 'dotenv/config';
 import express from 'express';
 import isPort from 'validator/lib/isPort.js';
 
-// Noteboard
-import Noteboard from './noteboard.js';
+// Notes
+import * as core from './core-notes.js';
 
 // Express Middlewares
 import logMiddleware from './middlewares/log.middleware.js';
@@ -59,7 +59,7 @@ const databasePath = parseDatabasePath();
 const server = express();
 
 // Create noteboard
-server.locals.noteboard = new Noteboard(databasePath); //this way the "noteboard" should be accessible in all components of the app
+server.locals.notesboard = new core.loadNotes(databasePath); //this way the "notesboard" should be accessible in all components of the app
 
 
 
