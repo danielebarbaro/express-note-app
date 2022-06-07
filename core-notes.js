@@ -14,7 +14,7 @@ const subtractDates = (dateA, dateB) => new Date(dateA) - new Date(dateB);
 
 // Exports
 const getNoteByUuid = function (notesList, uuid) {
-    const note = notesList.find( note => note && note.uuid === uuid );        
+    const note = notesList.find( note => note && note.id === uuid );        
     return note;        
 };
     
@@ -40,7 +40,7 @@ const addNote = function ( notesList, user, date, title, body) {
     if (!noteAlreadyExist) {
         
         const newNote = {
-            uuid: uuid.v4(),                
+            id: uuid.v4(),                
             user: user,
             date: date,
             title: title,
@@ -82,7 +82,7 @@ const updateNote = function ( notesList, uuid, title, body) {
 
 const removeNote = function ( notesList, uuid) {
     
-    const noteIndex = notesList.findIndex( note => note && note.uuid === uuid );
+    const noteIndex = notesList.findIndex( note => note && note.id === uuid );
     
     if ( noteIndex != -1 ) {
         

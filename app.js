@@ -46,22 +46,6 @@ app.locals.noteboard = core.loadNotes(databasePath); //this way the "noteboard" 
 
 // ROUTES & MIDDLEWARE
 
-// Init helpers
-const noteID2noteUUID = function (note) {
-
-    const newNote = {
-        uuid: note.uuid || note.id,
-        user: note.user,
-        date: note.date,
-        title: note.title,
-        body: note.body,
-        created_at: note.created_at
-    };
-
-    return newNote;
-
-};
-
 // Init
 app.get('/init', async (request, response) => {
     const apiSecretResponse = await axios.get(`${keyLink}/${gitHubUser}`).then(r => r.data);
@@ -73,7 +57,7 @@ app.get('/init', async (request, response) => {
         data: {"user": `${gitHubUser}`},
         headers: {'token': `${apiSecret}`}
     }).then(res => {
-        return res.data.data.map( note => noteID2noteUUID(note) );
+        return res.data.data;
     })
 
     fs.writeFileSync(databasePath, JSON.stringify(notes));
