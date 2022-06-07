@@ -40,7 +40,7 @@ notesRouter.get('/api/notes',
     }
 );
 
-notesRouter.get('/api/notes/:uuid', param('uuid').isUUID(), async (req, res) => {
+notesRouter.get('/api/notes/:uuid', param('uuid').isUUID(), async (req, res,next) => {
     try {
         validationResult(req).throw()
         let note = await notesService.getOneById(req.params.uuid)
@@ -49,15 +49,13 @@ notesRouter.get('/api/notes/:uuid', param('uuid').isUUID(), async (req, res) => 
                 .json({
                     "success": true,
                     "single": true,
-                    "data": [note]
+                    "data": await notesService.parseNotes([note])
                 })
         } else {
-            res.status(400)
-                .json(notesService.badRequest())
+            next()
         }
     } catch (err) {
-        res.status(400)
-            .json(notesService.badRequest())
+        next()
     }
 
 })
