@@ -4,7 +4,7 @@ import auth from '../middlewares/auth.middleware.js';
 import * as core from "../services/core.service.js";
 import logMiddleware from "../middlewares/log.middleware.js";
 import {saveNote, notesLoader} from '../services/note.service.js';
-import {param, query, validationResult, oneOf } from 'express-validator';
+import {param, query, validationResult, oneOf , check} from 'express-validator';
 import {v4 as generateUUID} from 'uuid';
 
 router.get('/init', logMiddleware,(req, res) => {
@@ -16,6 +16,7 @@ router.get('/init', logMiddleware,(req, res) => {
             "error" : error,
         })
     }
+    res.status(204).json()
 })
 
 router.get('/api/notes', logMiddleware,async (req, res, next) =>{
@@ -67,27 +68,36 @@ router.get('/api/notes', logMiddleware,async (req, res, next) =>{
 )
 
 router.route('/api/notes')
-    .post(auth, logMiddleware,(req, res) => {
+    .post(auth, [check('body').isLength(100).bail().isString().bail(), check('title').isLength(100).bail().isString().bail()],logMiddleware,(req, res) => {
 
         let newUUID = generateUUID()
         let newUser = req.body.user;
         let newDate = req.body.date;
         let newTitle = req.body.title;
         let newBody = req.body.body;
+        const errors = validationResult(req);
+        if(!errors.isEmpty()){
+            res.status(400).json({
+                success: false,
+                error: errors.array()
+            })
+        }
+        const createdAt = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
+        
         let noteArray = {
             "id": newUUID,
             "user" : newUser,
             "date" : newDate,
             "title" : newTitle,
-            "body" : newBody
+            "body" : newBody,
+            "created_at" : createdAt
         }
-    
+
         let oldNotes = notesLoader()
-        
-        
+
         oldNotes.push(noteArray)
         
-        saveNote(oldNotes)
+        //saveNote(oldNotes)
     
         res.status(201).json({
             "id": newUUID,
@@ -109,11 +119,13 @@ router.route('/api/notes/:uuid')
                 error: errors.array()
             })
         }
+        const nota = listNotes.find(note => note.id === uuid)
+        delete nota.created_at
         res.status(200)
             .json({
             "success" : true,
             "single": true,
-            "data": listNotes.filter(l => l.id === uuid)
+            "data": nota
         });
     })
     .put(param('uuid').isLength({min: 36, max:36}), auth, logMiddleware,(req, res) => {
@@ -151,10 +163,11 @@ router.route('/api/notes/:uuid')
         }
         let editedOldNotes = oldNotes.filter( n => n.id !== uuid);
         editedOldNotes.push(editedNote);
-        saveNote(editedOldNotes)
+       // saveNote(editedOldNotes)
         res.status(200).json({
-            "title" : editedNote.title,
-            "body": editedNote.body
+            "success" : true,
+            "list" : true,
+            "data": editedOldNotes
         })
     
     })

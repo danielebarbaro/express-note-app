@@ -8,7 +8,7 @@ const notesLoader = () => {
     try {
         const data = fs.readFileSync('./database/githubnotes.json')
         const result = data.toString();
-        return JSON.parse(result);
+        return JSON.parse(result).data;
     } catch (e) {
         // console.log('ERRORE file non trovato', e.message)
         return [];

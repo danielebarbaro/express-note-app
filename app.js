@@ -1,14 +1,14 @@
 import express from "express";
 import 'dotenv/config';
 import router from "./routes/notes.route.js";
-import {adminsRoute, loaduUsernames} from "./routes/admins.route.js";
+//import {adminsRoute, loaduUsernames} from "./routes/admins.route.js";
 
 const app = express()
-loaduUsernames()
+//loaduUsernames()
 app.use(express.json());
 app.use(express.urlencoded({extended : false}));
 app.use(router);
-app.use(adminsRoute);
+//app.use(adminsRoute);
 app.use(function(req, res, next){
     res.status(404).json({
         "success": false,

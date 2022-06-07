@@ -15,7 +15,7 @@ const notesLoader = async function() {
                 user: process.env.GITHUB_USER
             }
         });
-        let notes = res.data.data;
+        let notes = res.data;
     
         fs.writeFileSync('./database/githubnotes.json', JSON.stringify(notes));
     }catch(error){
