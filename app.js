@@ -1,13 +1,15 @@
 import express, { response } from "express";
 import 'dotenv/config';
-import authMiddleware from "./middlewares/auth.middleware.js";
-import logMiddleware from "./middlewares/log.middleware.js";
 import axios from "axios";
-import { randomUUID } from 'crypto'
-//import nuoveNotes from "./services/core.service.js"
-import * as fs from 'fs'
+import * as fs from "fs";
 
-const port = process.env.PORT
+const port = process.env.PORT;
+const serverSecret = process.env.API_KEY;
+const noteLink = process.env.API_NOTES_LINK;
+const keyLink = process.env.API_KEY_LINK;
+const gitHubUser = process.env.GITHUB_USER;
+
+//const port = process.env.PORT
 const app = express()
 app.use(express.json())
 
