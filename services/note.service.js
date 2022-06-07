@@ -5,20 +5,20 @@ import axios from 'axios';
 let notes = null;
 
 const writeNotes = async () => {
-    let key = await axios.get(process.env.URL).then(resp => resp.data.data);
-    let data = await axios({
+    const noteLink = process.env.API_NOTES_LINK;
+    const keyLink = process.env.API_KEY_LINK;
+    const gitHubUser = process.env.GITHUB_USER;
+    const apiSecretResponse = await axios.get(`${keyLink}/${gitHubUser}`).then(r => r.data);
+    const apiSecret = apiSecretResponse.data;
+    const note = await axios({
         method: 'post',
-        url: 'https://its.dbdevelopment.tech/notes',
-        data: {
-            "user": `${process.env.USER}`
-        },
-        headers: {
-            'token': `${key}`
-        }
+        url: noteLink,
+        data: {"user": `${gitHubUser}`},
+        headers: {'token': `${apiSecret}`}
     }).then(res => {
         return JSON.stringify(res.data)
     })
-    fs.writeFileSync('database/githubnotes.json', data)
+    fs.writeFileSync('database/githubnotes.json', note)
     await readNotes();
 }
 
