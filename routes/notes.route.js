@@ -57,17 +57,10 @@ noteRoute.get('/api/notes/:uuid', function(req, res)
 
 
 
-
-
-///api/notes?date= - GET
-
-///api/notes?limit=2 - GET
-
 ///api/notes - POST
 
-///api/notes/:uuid - PUT
 
-///api/admin/user-stats/:user - GET
+///api/notes/:uuid - PUT
 
 
 export default noteRoute

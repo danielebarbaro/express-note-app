@@ -49,18 +49,15 @@ const getByDate = function (date)
 
 const getByLimit = function (limit) 
 {
-    try{
-        const notes = fs.readFileSync(`database/githubnotes.json`)
-        const result = JSON.parse(notes.toString()).data
-        const data = result.sort((a,b) => new Date(b.date) - new Date(a.date))
-        data = data.slice(-limit);
-        return data
-    } 
-    catch (e) 
-    {
+    try {
+        const note = JSON.parse(fs.readFileSync('database/githubnotes.json'))
+        return note.data.sort((a, b) => new Date(b.date) - new Date(a.date)).slice(-limit)
+    } catch (e) {
         return []
     }
 }
+
+
 
 
 export default {
