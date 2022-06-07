@@ -20,14 +20,14 @@ it("[GET] - Call /api/notes with success", async () => {
             expect(result.success).toBeTruthy();
             expect(result.data.length).toBeGreaterThan(1);
             expect(Array.isArray(result.data)).toBeTruthy();
-            expect(result.data.shift()).toHaveProperty(
-                'id',
-                'user',
-                'date',
-                'title',
-                'body',
-                'created_at',
-            )
+
+            const note = result.data.shift();
+            expect(note).toHaveProperty('id');
+            expect(note).toHaveProperty('user');
+            expect(note).toHaveProperty('date');
+            expect(note).toHaveProperty('title');
+            expect(note).toHaveProperty('body');
+            expect(note).toHaveProperty('created_at');
         });
 });
 
@@ -38,17 +38,19 @@ it("[GET] - Call with a parameter /api/notes/:uuid with success ", async () => {
         .expect(200)
         .then((response) => {
             const result = response.body;
+
             expect(result.single).toBeTruthy();
             expect(result.success).toBeTruthy();
             expect(result.data.length).toBe(1);
             expect(Array.isArray(result.data)).toBeTruthy();
-            expect(result.data.shift()).toHaveProperty(
-                'id',
-                'user',
-                'date',
-                'title',
-                'body'
-            )
+
+            const note = result.data.shift();
+            expect(note).toHaveProperty('id');
+            expect(note).toHaveProperty('user');
+            expect(note).toHaveProperty('date');
+            expect(note).toHaveProperty('title');
+            expect(note).toHaveProperty('body');
+            expect(note).not.toHaveProperty('created_at');
         });
 });
 
@@ -97,13 +99,14 @@ it("[GET] - Received data values from /api/notes?date=2023-10-01", async () => {
             expect(result.success).toBeTruthy();
             expect(result.data.length).toBeGreaterThan(1);
             expect(Array.isArray(result.data)).toBeTruthy();
-            expect(result.data.shift()).toHaveProperty(
-                'id',
-                'user',
-                'date',
-                'title',
-                'body',
-            )
+
+            const note = result.data.shift();
+            expect(note).toHaveProperty('id');
+            expect(note).toHaveProperty('user');
+            expect(note).toHaveProperty('date');
+            expect(note).toHaveProperty('title');
+            expect(note).toHaveProperty('body');
+            expect(note).not.toHaveProperty('created_at');
         });
 });
 
@@ -127,13 +130,14 @@ it("[GET] - Received two values calling /api/notes?limit=2", async () => {
             expect(result.success).toBeTruthy();
             expect(result.data.length).toBe(2);
             expect(Array.isArray(result.data)).toBeTruthy();
-            expect(result.data.shift()).toHaveProperty(
-                'id',
-                'user',
-                'date',
-                'title',
-                'body',
-            )
+
+            const note = result.data.shift();
+            expect(note).toHaveProperty('id');
+            expect(note).toHaveProperty('user');
+            expect(note).toHaveProperty('date');
+            expect(note).toHaveProperty('title');
+            expect(note).toHaveProperty('body');
+            expect(note).not.toHaveProperty('created_at');
         });
 });
 
@@ -160,15 +164,13 @@ it("[POST] - Create a new resource using /api/notes", async () => {
         })
         .expect(201)
         .then((response) => {
-            const result = response.body;
-            console.log(result)
-            expect(result).toHaveProperty(
-                'id',
-                'user',
-                'date',
-                'title',
-                'body',
-            )
+            const note = response.body;
+            expect(note).toHaveProperty('id');
+            expect(note).toHaveProperty('user');
+            expect(note).toHaveProperty('date');
+            expect(note).toHaveProperty('title');
+            expect(note).toHaveProperty('body');
+            // expect(note).toHaveProperty('created_at'); // Opinabile
         });
 });
 
@@ -202,13 +204,14 @@ it("[PUT] - Update an existing resource using /api/notes/:uuid", async () => {
             expect(result.success).toBeTruthy();
             expect(result.data.length).toBe(1);
             expect(Array.isArray(result.data)).toBeTruthy();
-            expect(result.data.shift()).toHaveProperty(
-                'id',
-                'user',
-                'date',
-                'title',
-                'body'
-            )
+
+            const note = result.data.shift();
+            expect(note).toHaveProperty('id');
+            expect(note).toHaveProperty('user');
+            expect(note).toHaveProperty('date');
+            expect(note).toHaveProperty('title');
+            expect(note).toHaveProperty('body');
+            expect(note).toHaveProperty('created_at');
         });
 });
 
