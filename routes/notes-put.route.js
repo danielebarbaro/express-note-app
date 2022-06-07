@@ -57,7 +57,7 @@ notesPutRoute.put(
             
         } else {
             
-            reply.status(201).json({
+            reply.status(200).json({
                 success: true,
                 single: true,
                 data: [
