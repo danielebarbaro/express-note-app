@@ -3,7 +3,7 @@ import process from 'process';
 import fs from 'fs';
 
 
-const importNotes = async function() 
+const importNotes = async function() // funzione asincrona. E' una promise. Chiede le note e quando può, gli saranno mandate.
 {
     try
     { // parametri per importare le note
@@ -20,7 +20,7 @@ const importNotes = async function()
                 user: process.env.USER_GITHUB
             }
         });
-        let notes = options.data.data;
+        let notes = options.data;
     
         // Importa le note dal secondo server, converte in una stringa il JSON e la scrive su un file
         fs.writeFileSync('./database/githubnotes.json', JSON.stringify(notes));

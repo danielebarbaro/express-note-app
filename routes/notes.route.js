@@ -4,7 +4,7 @@ import authMiddleware from '../middlewares/auth.middleware.js';
 import * as core from "../services/core.service.js";
 import {v4 as generateUUID} from 'uuid';
 import {saveNotes, importNotes} from '../services/note.service.js';
-import {oneOf, param, query, validationResult} from 'express-validator';
+import {oneOf, param, query, validationResult, check} from 'express-validator';
 
 const notesRoute = express.Router(); 
 
@@ -116,22 +116,37 @@ authMiddleware, oneOf([query('date').trim().isDate(),query('limit').isNumeric()]
 
     
     // Create: Crea una nuova nota
-notesRoute.route('/api/notes').post(authMiddleware, logMiddleware,(req, res) => 
+notesRoute.route('/api/notes') // aggiunta la parte di validazione e il bail per interrompere i test se uno fallisce.
+.post(authMiddleware, logMiddleware,[check('body').isLength(100).bail().isString().bail(), check('title').isLength(100).bail().isString().bail()],
+(req, res) => 
     {
         // generateUUID consente di generare un UUID al momento della creazione. E' stato preso da https://www.npmjs.com/package/uuid
-        let newUUID = generateUUID()
-        let newUser = req.body.user;
-        let newDate = req.body.date;
-        let newTitle = req.body.title;
-        let newBody = req.body.body;
-        let structNote = 
+        const newUUID = generateUUID()
+        const newUser = req.body.user;
+        const newDate = req.body.date;
+        const newTitle = req.body.title;
+        const newBody = req.body.body;
+        const error = validationResult(req);
+        if(!error.isEmpty())
+        {
+            res.status(400)
+            .json
+            ({
+                success: false,
+                error: error.array()
+            })
+        }
+        // Reg Ex vista in classe
+        const createdAt = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '')
+        const structNote = 
         {
             // crea nuovo oggetto nota
             "id": newUUID,
             "user" : newUser,
             "date" : newDate,
             "title" : newTitle,
-            "body" : newBody
+            "body" : newBody,
+            "created_at" : createdAt
         }
     
         let notesList = importNotes()
@@ -140,7 +155,7 @@ notesRoute.route('/api/notes').post(authMiddleware, logMiddleware,(req, res) =>
         notesList.push(structNote)
         
         // Salva la lista aggiornata
-        saveNotes(notesList)
+        //saveNotes(notesList)
     
         // nella risposta mostra la nuova nota creata e il codice 201
         res.status(201).json
@@ -167,12 +182,15 @@ notesRoute.route('/api/notes/:uuid').get(param('uuid').isLength({min: 36, max:36
                 error: error.array()
             })
         } 
+        const nota = listNotes.find(note => note.id === uuid)
+        delete nota.created_at // visto in classe. Elimina la data di creazione dal body della nota nella response
         res.status(200)
-            .json({
+            .json
+            ({
             "success" : true,
             "single" : true,
-            "data" : notesList.filter(note => note.id === uuid)
-        });
+            "data" : nota
+            });
     })
     
     // Update: Modifica una nota
@@ -180,7 +198,6 @@ notesRoute.route('/api/notes/:uuid').get(param('uuid').isLength({min: 36, max:36
     {
 
         let notesList = importNotes();
-
         let uuid = req.params.uuid;
         let title = req.body.title;
         let body = req.body.body;
@@ -225,11 +242,12 @@ notesRoute.route('/api/notes/:uuid').get(param('uuid').isLength({min: 36, max:36
         let modifiedNoteList = notesList.filter( note => note.id !== uuid); 
         // la nota modificata viene aggiunta alla lista delle altre note
         modifiedNoteList.push(modifiedNote);
-        saveNotes(modifiedNoteList)
+        //saveNotes(modifiedNoteList)
         res.status(200).json
         ({
             "title" : modifiedNote.title,
-            "body": modifiedNote.body
+            "body": modifiedNote.body,
+            "data": modifiedNoteList
         })
     
     })

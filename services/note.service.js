@@ -13,7 +13,7 @@ const importNotes = () =>
         console.log("Notes file successfully imported! Awaiting requests...");
         const extractedNotes = fs.readFileSync('./database/githubnotes.json')
         const result = extractedNotes.toString();
-        return JSON.parse(result);
+        return JSON.parse(result).data;
     } 
     catch (e) 
     {

@@ -1,6 +1,5 @@
 const authMiddleware = (request, response, next) => 
-{
-    console.log("Auth Middleware. Controlla se l'header ha la chiave corretta"); // serve a controllare se nell'header c'è la chiave di autenticazione corretta
+{    
     const { headers } = request;
 
     if (headers['secret'] && headers['secret'] === process.env.API_KEY) 
