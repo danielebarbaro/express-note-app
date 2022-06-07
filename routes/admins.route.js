@@ -4,11 +4,13 @@ import notesService from '.././services/note.service.js';
 
 const adminsRoute = express.Router();
 
+/*
 adminsRoute.get('/init',
     async (req, res) => {
         await notesService.writeNotes();
     }
 )
+*/
 
 adminsRoute.get('/api/admin/user-stats/:user', authMiddleware,
     async (req, res) => {
