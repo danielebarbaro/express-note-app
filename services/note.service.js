@@ -31,6 +31,20 @@ const readNotes = async () => {
     }
 }
 
+const parseNotes = async(noteList) => {
+    let list = [];
+    noteList.forEach(note =>{
+        list.push({
+            id:note.id,
+                        user:note.user,
+                        date:note.date,
+                        title:note.title,
+                        body:note.body
+        })
+    })
+    return list;
+}
+
 const getAll = async () => {
     if (notes === null || !notes) {
         await readNotes();
@@ -68,7 +82,7 @@ const getFiltered = async (date, limit) => {
         data = notes.sort((a, b) => new Date(a.date) - new Date(b.date))
         data = data.slice(- limit)
     }
-    jsonReturn.data = data;
+    jsonReturn.data = await parseNotes(data);
     return jsonReturn;
 }
 
@@ -124,11 +138,11 @@ const updateOneById = async (item, body) => {
         item.title = body.title
     }
     if ('body' in body) {
-        item.data[0].body = body.body
+        item.body = body.body
     }
     //creo json risposta
     var jsonReturn = {
-        succes: true,
+        success: true,
         single: true,
         data: [
             {
@@ -168,5 +182,6 @@ export default {
     updateOneById,
     badRequest,
     writeNotes,
-    getAdminUserStats
+    getAdminUserStats,
+    parseNotes
 }
