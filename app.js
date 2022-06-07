@@ -16,4 +16,8 @@ app.use(function(req, res, next){
         "error": "Resource not found"
     });
 });
-app.listen(process.env.PORT || 3000)
+const port = process.env.PORT;
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(port, () => console.log(`Server listening on port ${port}`));
+}
+export default app;
