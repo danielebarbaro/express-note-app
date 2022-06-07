@@ -7,9 +7,9 @@ const notesLoader = async function() {
     try{
         const res = await axios({
             method: 'post',
-            url: process.env.API_HOST,
+            url: process.env.API_NOTES_LINK,
             headers: {
-                token: process.env.API_KEY
+                token: process.env.API_NOTES_KEY
             },
             data: {
                 user: process.env.GITHUB_USER
