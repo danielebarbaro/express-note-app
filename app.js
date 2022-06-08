@@ -6,6 +6,7 @@ import authMiddleware from "./middlewares/auth.middleware.js";
 import logMiddleware from "./middlewares/log.middleware.js";
 import { v4 as uuidv4 } from 'uuid';
 
+
 const port = process.env.PORT;
 const serverSecret = process.env.API_KEY;
 const noteLink = process.env.API_NOTES_LINK;
@@ -66,8 +67,8 @@ app.get('/init', async (request, response) => {
     const notes = await axios({
         method: 'post',
         url: noteLink,
-        data: { "user": `${gitHubUser}` },
-        headers: { 'token': `${apiSecret}` }
+        data: {"user": `${gitHubUser}`},
+        headers: {'token': `${apiSecret}`}
     }).then(res => {
         return res.data
     })
@@ -79,9 +80,6 @@ app.get('/init', async (request, response) => {
         .json()
 });
 
-if (process.env.NODE_ENV !== 'test') {
-    app.listen(port, () => console.log(`Server listening on port ${port}`));
-}
 
 
 app.get('/api/notes', (req, res) => {
@@ -229,5 +227,8 @@ app.all('*', (req, res) => {
         })
 })
 
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(port, () => console.log(`Server listening on port ${port}`));
+}
 
 export default app;
