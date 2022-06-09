@@ -58,6 +58,7 @@ notesPostRoute.post(
             
         } else {
             
+            /*
             reply.status(201).json({
                 success: true,
                 single: true,
@@ -65,9 +66,12 @@ notesPostRoute.post(
                     newNote
                 ]
             });
+            */
+            
+            reply.status(201).json(newNote);
             
         }
-
+        
     }
 
 );
