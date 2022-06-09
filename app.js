@@ -85,18 +85,17 @@ app.use('/api/notes', notesPutRoute);
 // "/api/admin" routes
 app.use('/api/admin', adminRoute);
 
-// Default error for non existent/implemente paths
+// Default error for non existent/implemented paths
 app.use(
     //'/',
     function (request, reply) {
         reply.status(500).json({
             success: false,
             code: 1001,
-            message: 'Resource not found'
+            error: 'Resource not found'
         });
     }
 );
-
 
 
 
