@@ -43,16 +43,30 @@ notesGetRoute.get(
            return reply.status(400).json({ errors: errors.array() });
         }
         
-        const limit = request.query.limit !== undefined ? request.query.limit : -1;
-        const sortByDate = request.query.limit !== undefined; //if limit is set order result by date
-
-        const afterDate = request.query.date || undefined;
+        let filtered = false;
+        
+        let limit = -1;
+        let sortByDate = false;
+        
+        if (request.query.limit !== undefined) {
+            limit = request.query.limit;
+            sortByDate = true;
+            filtered = true;
+        }
+        
+        let afterDate = undefined;
+        
+        if (request.query.date !== undefined) {
+            afterDate = request.query.date;
+            filtered = true;
+        }
         
         //const notes = request.app.locals.noteboard.listNotes(limit, sortByDate, afterDate);
         const notes = core.listNotes(request.app.locals.noteboard, limit, sortByDate, afterDate);
         
         reply.status(200).json({
             success: true,
+            filtered: filtered,
             list: true,
             data: notes
         });
