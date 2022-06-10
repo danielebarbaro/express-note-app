@@ -106,7 +106,11 @@ notesGetRoute.get(
         // Check validation results
         const errors = validationResult(request);
         if (!errors.isEmpty()) {
-           return reply.status(400).json({ errors: errors.array() });
+           return reply.status(500).json({
+                success: false,
+                code: 1001,
+                error: 'Resource not found'
+            });
         }
         
         //const note = request.app.locals.noteboard.getNote(request.params.uuid);
