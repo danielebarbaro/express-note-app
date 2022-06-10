@@ -13,6 +13,13 @@ Creare un server che permetta di gestire un app di note con [express-js](https:/
  * Utilizzare il file `.env.sample` per gestire le variabili del server
 
 ### Init del progetto
+
+>⚠️ Avevo aggiunto l'init in un file separato
+>
+>⚠️ Per lanciarlo eseguire il comando `npm run init` o `node init.js`
+>
+>⚠️ Credevo di aver aggiunto queste righe giorni fa ma a quanto pare non aveva funzionato
+
 Ogni utente deve richiedere un `APIKEY` al link `https://its.dbdevelopment.tech/key/{user}`
 
 Per ottenere la chiave bisogna chiamare in `GET` la url `https://its.dbdevelopment.tech/key/@nomeutenteGitHub` con il vostro utente.

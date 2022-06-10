@@ -1,18 +1,25 @@
-// Middleware auth realizzato in classe
-const authMiddleware = (request, response, next) => {
-    console.log("Auth Middleware: Deve controllare se dentro l'header esiste la chiave corretta");
+const apiKey = process.env.API_KEY;
+
+const authMiddleware = function (request, reply, next) {
+
     const {headers} = request;
 
-    if (headers['secret'] === process.env.API_KEY) {
+    if (headers['secret'] === apiKey) {
         next();
+    } else if (headers['secret'] === undefined) {
+        reply.status(401).json({
+            success: false,
+            code: 2001,
+            error: 'Unauthorized'
+        });
     } else {
-        response
-            .status(401)
-            .json({
-                status: 'fail',
-                code: 403,
-                error: 'Unauthorized'
-            });
+        reply.status(403).json({
+            success: false,
+            code: 2002,
+            error: 'Forbidden'
+        });
     }
+    
 }
-export default authMiddleware
+
+export default authMiddleware;
