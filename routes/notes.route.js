@@ -25,7 +25,7 @@ noteRoute.get('/api/notes/:uuid',function(req, res) {
             .json({
                 "status": 'success',
                 "single": true,
-                "data": (noteService.getNoteByUuid(uuid))
+                "data": (console.log(notes.data.find(note => note.id === uuid))
             })
     }
 );
@@ -57,3 +57,5 @@ noteRoute.get('/api/notes/:limit',function(req, res) {
             "data": (noteService.getNoteByLimit(limit))
         })
 });
+
+export default noteRoute;
